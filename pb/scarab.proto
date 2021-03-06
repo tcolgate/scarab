@@ -4,52 +4,57 @@ syntax = "proto3";
 
 package scarab;
 
-message Message {
-  message ConnectMsg {
-   uint32 Level = 1;
-  }
+service Leader {
+  rpc Register (RegisterRequest) returns (stream KeepAlive) {};
+}
 
-  message InitiateMsg {
-   enum NodeState {
-     sleeping = 0;
-     find     = 1;
-     found    = 2;
-   }
-   uint32    level     = 1;
-   graphalg.Weight    fragment  = 2;
-   NodeState nodeState = 3;
-  }
+message RegisterRequest {
+  string profile = 1;
+}
 
-  message TestMsg {
-   uint32 level    = 1;
-   graphalg.Weight fragment = 2;
-  }
+message KeepAlive{
+}
 
-  message AcceptMsg {
-  }
+service Worker {
+  rpc RunJob(RunJobRequest) returns (stream JobMetrics) {};
+}
 
-  message RejectMsg {
-  }
 
-  message ReportMsg {
-    graphalg.Weight weight = 1;
-  }
+message RunJobRequest {
+  string profile  = 1;
+  float  interval = 2;
+  float  maxrps   = 3;
 
-  message ChangeRootMsg {
-  }
+  string host     = 4;
+}
 
-  message HaltMsg {
-  }
+message Counter {
+  float value = 1;
+}
 
+message Gauge {
+  float value = 1;
+}
+
+message Rate {
+  float value    = 1;
+  float duration = 2;
+}
+
+message Histogram {
+}
+
+message Metric {
+  string name           = 1;
+  string description    = 2;
   oneof U {
-    ConnectMsg connect = 2;
-    InitiateMsg initiate = 3;
-    TestMsg test = 4;
-    AcceptMsg accept = 5;
-    RejectMsg reject = 6;
-    ReportMsg report = 7;
-    ChangeRootMsg changeRoot = 8;
-    HaltMsg halt = 9;
+    Counter counter     = 3;
+    Gauge gauge         = 4;
+    Rate rate           = 5;
+    Histogram histogram = 6;
   }
 }
 
+message JobMetrics {
+  repeated Metric metrics = 1;
+}
