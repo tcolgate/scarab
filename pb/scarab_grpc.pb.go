@@ -131,6 +131,7 @@ var Leader_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkerClient interface {
+	ReportLoad(ctx context.Context, in *ReportLoadRequest, opts ...grpc.CallOption) (Worker_ReportLoadClient, error)
 	RunJob(ctx context.Context, in *RunJobRequest, opts ...grpc.CallOption) (Worker_RunJobClient, error)
 }
 
@@ -142,8 +143,40 @@ func NewWorkerClient(cc grpc.ClientConnInterface) WorkerClient {
 	return &workerClient{cc}
 }
 
+func (c *workerClient) ReportLoad(ctx context.Context, in *ReportLoadRequest, opts ...grpc.CallOption) (Worker_ReportLoadClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[0], "/scarab.Worker/ReportLoad", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &workerReportLoadClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Worker_ReportLoadClient interface {
+	Recv() (*LoadMetrics, error)
+	grpc.ClientStream
+}
+
+type workerReportLoadClient struct {
+	grpc.ClientStream
+}
+
+func (x *workerReportLoadClient) Recv() (*LoadMetrics, error) {
+	m := new(LoadMetrics)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *workerClient) RunJob(ctx context.Context, in *RunJobRequest, opts ...grpc.CallOption) (Worker_RunJobClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[0], "/scarab.Worker/RunJob", opts...)
+	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[1], "/scarab.Worker/RunJob", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -178,6 +211,7 @@ func (x *workerRunJobClient) Recv() (*JobMetrics, error) {
 // All implementations must embed UnimplementedWorkerServer
 // for forward compatibility
 type WorkerServer interface {
+	ReportLoad(*ReportLoadRequest, Worker_ReportLoadServer) error
 	RunJob(*RunJobRequest, Worker_RunJobServer) error
 	mustEmbedUnimplementedWorkerServer()
 }
@@ -186,6 +220,9 @@ type WorkerServer interface {
 type UnimplementedWorkerServer struct {
 }
 
+func (UnimplementedWorkerServer) ReportLoad(*ReportLoadRequest, Worker_ReportLoadServer) error {
+	return status.Errorf(codes.Unimplemented, "method ReportLoad not implemented")
+}
 func (UnimplementedWorkerServer) RunJob(*RunJobRequest, Worker_RunJobServer) error {
 	return status.Errorf(codes.Unimplemented, "method RunJob not implemented")
 }
@@ -200,6 +237,27 @@ type UnsafeWorkerServer interface {
 
 func RegisterWorkerServer(s grpc.ServiceRegistrar, srv WorkerServer) {
 	s.RegisterService(&Worker_ServiceDesc, srv)
+}
+
+func _Worker_ReportLoad_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ReportLoadRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(WorkerServer).ReportLoad(m, &workerReportLoadServer{stream})
+}
+
+type Worker_ReportLoadServer interface {
+	Send(*LoadMetrics) error
+	grpc.ServerStream
+}
+
+type workerReportLoadServer struct {
+	grpc.ServerStream
+}
+
+func (x *workerReportLoadServer) Send(m *LoadMetrics) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Worker_RunJob_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -231,6 +289,11 @@ var Worker_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*WorkerServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ReportLoad",
+			Handler:       _Worker_ReportLoad_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "RunJob",
 			Handler:       _Worker_RunJob_Handler,

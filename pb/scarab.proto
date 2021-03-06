@@ -11,15 +11,30 @@ service Leader {
 
 message RegisterRequest {
   string profile = 1;
+  string name    = 2;
 }
 
 message KeepAlive{
 }
 
 service Worker {
+  rpc ReportLoad(ReportLoadRequest) returns (stream LoadMetrics) {};
   rpc RunJob(RunJobRequest) returns (stream JobMetrics) {};
 }
 
+
+message ReportLoadRequest {
+  float interval = 1;
+}
+
+message LoadMetrics {
+  float processrate = 1;
+  float serveridle  = 2;
+  float serverload  = 3;
+
+  int64 processmem    = 4;
+  int64 memdree       = 5;
+}
 
 message RunJobRequest {
   string profile  = 1;
