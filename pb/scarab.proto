@@ -1,6 +1,7 @@
 // This file is part of scarab.
 
 syntax = "proto3";
+option go_package = "github.com/tcolgate/scarab/scarab";
 
 package scarab;
 
