@@ -1,0 +1,55 @@
+// This file is part of scarab.
+
+syntax = "proto3";
+
+package scarab;
+
+message Message {
+  message ConnectMsg {
+   uint32 Level = 1;
+  }
+
+  message InitiateMsg {
+   enum NodeState {
+     sleeping = 0;
+     find     = 1;
+     found    = 2;
+   }
+   uint32    level     = 1;
+   graphalg.Weight    fragment  = 2;
+   NodeState nodeState = 3;
+  }
+
+  message TestMsg {
+   uint32 level    = 1;
+   graphalg.Weight fragment = 2;
+  }
+
+  message AcceptMsg {
+  }
+
+  message RejectMsg {
+  }
+
+  message ReportMsg {
+    graphalg.Weight weight = 1;
+  }
+
+  message ChangeRootMsg {
+  }
+
+  message HaltMsg {
+  }
+
+  oneof U {
+    ConnectMsg connect = 2;
+    InitiateMsg initiate = 3;
+    TestMsg test = 4;
+    AcceptMsg accept = 5;
+    RejectMsg reject = 6;
+    ReportMsg report = 7;
+    ChangeRootMsg changeRoot = 8;
+    HaltMsg halt = 9;
+  }
+}
+
