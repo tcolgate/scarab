@@ -10,8 +10,9 @@ service Leader {
 }
 
 message RegisterRequest {
-  string profile = 1;
-  string name    = 2;
+  repeated string profiles = 1;
+  string addr              = 2;
+  string name              = 3;
 }
 
 message KeepAlive{

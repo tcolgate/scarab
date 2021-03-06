@@ -17,7 +17,7 @@ func (s *Server) Register(req *pb.RegisterRequest, stream pb.Leader_RegisterServ
 	ctx := stream.Context()
 	defer ticker.Stop()
 
-	log.Printf("registered worker for profile %s", req.Profile)
+	log.Printf("registered worker for profiles %v", req.Profiles)
 
 	for {
 		select {
