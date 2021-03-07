@@ -45,12 +45,7 @@ message ReportLoadRequest {
 }
 
 message LoadMetrics {
-  float processrate = 1;
-  float serveridle  = 2;
-  float serverload  = 3;
-
-  int64 processmem    = 4;
-  int64 memdree       = 5;
+  repeated MetricFamily metrics = 1;
 }
 
 message JobArg {
@@ -86,18 +81,21 @@ message Histogram {
 }
 
 message Metric {
-  string name                   = 1;
-  string description            = 2;
-  map<string, string> labels    = 3;
-
+  map<string, string> labels    = 1;
   oneof value {
-    Counter counter             = 4;
-    Gauge gauge                 = 5;
-    Rate rate                   = 6;
-    Histogram histogram         = 7;
+    Counter counter             = 2;
+    Gauge gauge                 = 3;
+    Rate rate                   = 4;
+    Histogram histogram         = 5;
   }
 }
 
+message MetricFamily {
+  string name             = 1;
+  string help             = 2;
+  repeated Metric metrics = 3;
+}
+
 message JobMetrics {
-  repeated Metric metrics = 1;
+  repeated MetricFamily metrics = 1;
 }

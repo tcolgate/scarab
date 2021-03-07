@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/tcolgate/scarab"
 	pb "github.com/tcolgate/scarab/pb"
@@ -24,13 +25,23 @@ func main() {
 
 	grpcServer := grpc.NewServer(opts...)
 
-	pb.RegisterManagerServer(grpcServer, &scarab.Server{})
-	pb.RegisterWorkerServer(grpcServer, &scarab.Server{})
+	mngr := &scarab.Manager{}
+	wrkr, err := scarab.NewWorker()
+	if err != nil {
+		log.Fatalf("failed to create worker: %v", err)
+	}
+	pb.RegisterManagerServer(grpcServer, mngr)
+	pb.RegisterWorkerServer(grpcServer, wrkr)
 
-	grpcServer.Serve(lis)
+	go func() {
+		err := grpcServer.Serve(lis)
+		log.Printf("listen err, %v", err)
+	}()
 
 	ctx := context.Background()
-	var clientOpts []grpc.DialOption
+	clientOpts := []grpc.DialOption{
+		grpc.WithInsecure(),
+	}
 	conn, err := grpc.Dial(serverAddr, clientOpts...)
 	if err != nil {
 		log.Panicf("dial error, %v", err)
@@ -62,11 +73,64 @@ func main() {
 	go func() {
 		// throw away the keepalives.
 		for {
-			_, err := cli.Recv()
+			msg, err := cli.Recv()
 			if err != nil {
+				log.Printf("error getting keepalive, %#v", err)
 				return
+			}
+			log.Printf("keepalive: %#v", msg)
+		}
+	}()
+
+	srvconn, err := grpc.Dial(serverAddr, clientOpts...)
+	if err != nil {
+		log.Panicf("dial error, %v", err)
+		return
+	}
+	defer conn.Close()
+	wcli := pb.NewWorkerClient(srvconn)
+	loadrep, err := wcli.ReportLoad(ctx, &pb.ReportLoadRequest{})
+
+	go func() {
+		// throw away the keepalives.
+		for {
+			msg, err := loadrep.Recv()
+			if err != nil {
+				log.Printf("error getting loadreport, %#v", err)
+				return
+			}
+			for i := range msg.Metrics {
+				log.Printf("loadreport: %#v", msg.Metrics[i])
 			}
 		}
 	}()
+
+	rjsrc, err := wcli.RunJob(ctx)
+	if err != nil {
+		log.Panicf("dial error, %v", err)
+		return
+	}
+
+	go func() {
+		// throw away the keepalives.
+		for {
+			msg, err := rjsrc.Recv()
+			if err != nil {
+				log.Printf("error getting loadreport, %#v", err)
+				return
+			}
+			log.Printf("metric %#v", msg)
+		}
+	}()
+
+	err = rjsrc.Send(&pb.RunJobRequest{
+		Profile: "myprofile",
+		Args:    []*pb.JobArg{},
+	})
+	if err != nil {
+		log.Panicf("runjub error, %v", err)
+		return
+	}
+	time.Sleep(10 * time.Second)
 
 }
