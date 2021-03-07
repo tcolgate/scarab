@@ -9,15 +9,18 @@ import (
 
 // Server implments the leaders service.
 type Server struct {
+	pb.UnimplementedManagerServer
+	pb.UnimplementedWorkerServer
+
 	done chan struct{}
 }
 
-func (s *Server) Register(req *pb.RegisterRequest, stream pb.Leader_RegisterServer) error {
+func (s *Server) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Manager_RegisterProfileServer) error {
 	ticker := time.NewTicker(1 * time.Second)
 	ctx := stream.Context()
 	defer ticker.Stop()
 
-	log.Printf("registered worker for profiles %v", req.Profiles)
+	log.Printf("registered worker for profile %s", req.Profile)
 
 	for {
 		select {
@@ -48,20 +51,24 @@ func (s *Server) ReportLoad(req *pb.ReportLoadRequest, stream pb.Worker_ReportLo
 	return nil
 }
 
-func (s *Server) RunJob(req *pb.RunJobRequest, stream pb.Worker_RunJobServer) error {
+func (s *Server) RunJob(stream pb.Worker_RunJobServer) error {
 	ticker := time.NewTicker(1 * time.Second)
 	ctx := stream.Context()
 	defer ticker.Stop()
 
-	log.Printf("start running profile %s", req.Profile)
-
-	for {
-		select {
-		case <-ctx.Done():
-		case <-s.done:
-		case <-ticker.C:
-			stream.Send(&pb.JobMetrics{})
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+			case <-s.done:
+			case <-ticker.C:
+				stream.Send(&pb.JobMetrics{})
+			}
 		}
+	}()
+	for {
+		stream.Recv()
 	}
+
 	return nil
 }

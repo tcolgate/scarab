@@ -14,27 +14,27 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// LeaderClient is the client API for Leader service.
+// ManagerClient is the client API for Manager service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LeaderClient interface {
-	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (Leader_RegisterClient, error)
+type ManagerClient interface {
+	RegisterProfile(ctx context.Context, in *RegisterProfileRequest, opts ...grpc.CallOption) (Manager_RegisterProfileClient, error)
 }
 
-type leaderClient struct {
+type managerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewLeaderClient(cc grpc.ClientConnInterface) LeaderClient {
-	return &leaderClient{cc}
+func NewManagerClient(cc grpc.ClientConnInterface) ManagerClient {
+	return &managerClient{cc}
 }
 
-func (c *leaderClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (Leader_RegisterClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Leader_ServiceDesc.Streams[0], "/scarab.Leader/Register", opts...)
+func (c *managerClient) RegisterProfile(ctx context.Context, in *RegisterProfileRequest, opts ...grpc.CallOption) (Manager_RegisterProfileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Manager_ServiceDesc.Streams[0], "/scarab.Manager/RegisterProfile", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &leaderRegisterClient{stream}
+	x := &managerRegisterProfileClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -44,16 +44,16 @@ func (c *leaderClient) Register(ctx context.Context, in *RegisterRequest, opts .
 	return x, nil
 }
 
-type Leader_RegisterClient interface {
+type Manager_RegisterProfileClient interface {
 	Recv() (*KeepAlive, error)
 	grpc.ClientStream
 }
 
-type leaderRegisterClient struct {
+type managerRegisterProfileClient struct {
 	grpc.ClientStream
 }
 
-func (x *leaderRegisterClient) Recv() (*KeepAlive, error) {
+func (x *managerRegisterProfileClient) Recv() (*KeepAlive, error) {
 	m := new(KeepAlive)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -61,66 +61,66 @@ func (x *leaderRegisterClient) Recv() (*KeepAlive, error) {
 	return m, nil
 }
 
-// LeaderServer is the server API for Leader service.
-// All implementations must embed UnimplementedLeaderServer
+// ManagerServer is the server API for Manager service.
+// All implementations must embed UnimplementedManagerServer
 // for forward compatibility
-type LeaderServer interface {
-	Register(*RegisterRequest, Leader_RegisterServer) error
-	mustEmbedUnimplementedLeaderServer()
+type ManagerServer interface {
+	RegisterProfile(*RegisterProfileRequest, Manager_RegisterProfileServer) error
+	mustEmbedUnimplementedManagerServer()
 }
 
-// UnimplementedLeaderServer must be embedded to have forward compatible implementations.
-type UnimplementedLeaderServer struct {
+// UnimplementedManagerServer must be embedded to have forward compatible implementations.
+type UnimplementedManagerServer struct {
 }
 
-func (UnimplementedLeaderServer) Register(*RegisterRequest, Leader_RegisterServer) error {
-	return status.Errorf(codes.Unimplemented, "method Register not implemented")
+func (UnimplementedManagerServer) RegisterProfile(*RegisterProfileRequest, Manager_RegisterProfileServer) error {
+	return status.Errorf(codes.Unimplemented, "method RegisterProfile not implemented")
 }
-func (UnimplementedLeaderServer) mustEmbedUnimplementedLeaderServer() {}
+func (UnimplementedManagerServer) mustEmbedUnimplementedManagerServer() {}
 
-// UnsafeLeaderServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LeaderServer will
+// UnsafeManagerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ManagerServer will
 // result in compilation errors.
-type UnsafeLeaderServer interface {
-	mustEmbedUnimplementedLeaderServer()
+type UnsafeManagerServer interface {
+	mustEmbedUnimplementedManagerServer()
 }
 
-func RegisterLeaderServer(s grpc.ServiceRegistrar, srv LeaderServer) {
-	s.RegisterService(&Leader_ServiceDesc, srv)
+func RegisterManagerServer(s grpc.ServiceRegistrar, srv ManagerServer) {
+	s.RegisterService(&Manager_ServiceDesc, srv)
 }
 
-func _Leader_Register_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(RegisterRequest)
+func _Manager_RegisterProfile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RegisterProfileRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(LeaderServer).Register(m, &leaderRegisterServer{stream})
+	return srv.(ManagerServer).RegisterProfile(m, &managerRegisterProfileServer{stream})
 }
 
-type Leader_RegisterServer interface {
+type Manager_RegisterProfileServer interface {
 	Send(*KeepAlive) error
 	grpc.ServerStream
 }
 
-type leaderRegisterServer struct {
+type managerRegisterProfileServer struct {
 	grpc.ServerStream
 }
 
-func (x *leaderRegisterServer) Send(m *KeepAlive) error {
+func (x *managerRegisterProfileServer) Send(m *KeepAlive) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-// Leader_ServiceDesc is the grpc.ServiceDesc for Leader service.
+// Manager_ServiceDesc is the grpc.ServiceDesc for Manager service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Leader_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "scarab.Leader",
-	HandlerType: (*LeaderServer)(nil),
+var Manager_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "scarab.Manager",
+	HandlerType: (*ManagerServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Register",
-			Handler:       _Leader_Register_Handler,
+			StreamName:    "RegisterProfile",
+			Handler:       _Manager_RegisterProfile_Handler,
 			ServerStreams: true,
 		},
 	},
@@ -132,7 +132,7 @@ var Leader_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkerClient interface {
 	ReportLoad(ctx context.Context, in *ReportLoadRequest, opts ...grpc.CallOption) (Worker_ReportLoadClient, error)
-	RunJob(ctx context.Context, in *RunJobRequest, opts ...grpc.CallOption) (Worker_RunJobClient, error)
+	RunJob(ctx context.Context, opts ...grpc.CallOption) (Worker_RunJobClient, error)
 }
 
 type workerClient struct {
@@ -175,28 +175,27 @@ func (x *workerReportLoadClient) Recv() (*LoadMetrics, error) {
 	return m, nil
 }
 
-func (c *workerClient) RunJob(ctx context.Context, in *RunJobRequest, opts ...grpc.CallOption) (Worker_RunJobClient, error) {
+func (c *workerClient) RunJob(ctx context.Context, opts ...grpc.CallOption) (Worker_RunJobClient, error) {
 	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[1], "/scarab.Worker/RunJob", opts...)
 	if err != nil {
 		return nil, err
 	}
 	x := &workerRunJobClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
 	return x, nil
 }
 
 type Worker_RunJobClient interface {
+	Send(*RunJobRequest) error
 	Recv() (*JobMetrics, error)
 	grpc.ClientStream
 }
 
 type workerRunJobClient struct {
 	grpc.ClientStream
+}
+
+func (x *workerRunJobClient) Send(m *RunJobRequest) error {
+	return x.ClientStream.SendMsg(m)
 }
 
 func (x *workerRunJobClient) Recv() (*JobMetrics, error) {
@@ -212,7 +211,7 @@ func (x *workerRunJobClient) Recv() (*JobMetrics, error) {
 // for forward compatibility
 type WorkerServer interface {
 	ReportLoad(*ReportLoadRequest, Worker_ReportLoadServer) error
-	RunJob(*RunJobRequest, Worker_RunJobServer) error
+	RunJob(Worker_RunJobServer) error
 	mustEmbedUnimplementedWorkerServer()
 }
 
@@ -223,7 +222,7 @@ type UnimplementedWorkerServer struct {
 func (UnimplementedWorkerServer) ReportLoad(*ReportLoadRequest, Worker_ReportLoadServer) error {
 	return status.Errorf(codes.Unimplemented, "method ReportLoad not implemented")
 }
-func (UnimplementedWorkerServer) RunJob(*RunJobRequest, Worker_RunJobServer) error {
+func (UnimplementedWorkerServer) RunJob(Worker_RunJobServer) error {
 	return status.Errorf(codes.Unimplemented, "method RunJob not implemented")
 }
 func (UnimplementedWorkerServer) mustEmbedUnimplementedWorkerServer() {}
@@ -261,15 +260,12 @@ func (x *workerReportLoadServer) Send(m *LoadMetrics) error {
 }
 
 func _Worker_RunJob_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(RunJobRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(WorkerServer).RunJob(m, &workerRunJobServer{stream})
+	return srv.(WorkerServer).RunJob(&workerRunJobServer{stream})
 }
 
 type Worker_RunJobServer interface {
 	Send(*JobMetrics) error
+	Recv() (*RunJobRequest, error)
 	grpc.ServerStream
 }
 
@@ -279,6 +275,14 @@ type workerRunJobServer struct {
 
 func (x *workerRunJobServer) Send(m *JobMetrics) error {
 	return x.ServerStream.SendMsg(m)
+}
+
+func (x *workerRunJobServer) Recv() (*RunJobRequest, error) {
+	m := new(RunJobRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // Worker_ServiceDesc is the grpc.ServiceDesc for Worker service.
@@ -298,6 +302,7 @@ var Worker_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "RunJob",
 			Handler:       _Worker_RunJob_Handler,
 			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "scarab.proto",

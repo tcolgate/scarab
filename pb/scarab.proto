@@ -5,14 +5,30 @@ option go_package = "github.com/tcolgate/scarab/scarab";
 
 package scarab;
 
-service Leader {
-  rpc Register (RegisterRequest) returns (stream KeepAlive) {};
+service Manager {
+  rpc RegisterProfile (RegisterProfileRequest) returns (stream KeepAlive) {};
 }
 
-message RegisterRequest {
-  repeated string profiles = 1;
-  string addr              = 2;
-  string name              = 3;
+message ProfileArgOption {
+  repeated string option = 1;
+}
+
+message ProfileArg {
+  string name                 = 1;
+  string description          = 2;
+  oneof default {
+    string string             = 3;
+    float  float              = 4;
+    ProfileArgOption option   = 5;
+  }
+}
+
+message RegisterProfileRequest {
+  string profile            = 1;
+  string addr               = 2;
+  string name               = 3;
+
+  repeated ProfileArg args = 4;
 }
 
 message KeepAlive{
@@ -20,7 +36,7 @@ message KeepAlive{
 
 service Worker {
   rpc ReportLoad(ReportLoadRequest) returns (stream LoadMetrics) {};
-  rpc RunJob(RunJobRequest) returns (stream JobMetrics) {};
+  rpc RunJob(stream RunJobRequest) returns (stream JobMetrics) {};
 }
 
 
@@ -37,12 +53,20 @@ message LoadMetrics {
   int64 memdree       = 5;
 }
 
-message RunJobRequest {
-  string profile  = 1;
-  float  interval = 2;
-  float  maxrps   = 3;
+message JobArg {
+  string name                 = 1;
+  oneof value {
+    string string             = 2;
+    float  float              = 3;
+  }
+}
 
-  string host     = 4;
+message RunJobRequest {
+  string profile       = 1;
+  float  interval      = 2;
+  float  maxrps        = 3;
+
+  repeated JobArg args = 4;
 }
 
 message Counter {
@@ -62,13 +86,15 @@ message Histogram {
 }
 
 message Metric {
-  string name           = 1;
-  string description    = 2;
-  oneof U {
-    Counter counter     = 3;
-    Gauge gauge         = 4;
-    Rate rate           = 5;
-    Histogram histogram = 6;
+  string name                   = 1;
+  string description            = 2;
+  map<string, string> labels    = 3;
+
+  oneof value {
+    Counter counter             = 4;
+    Gauge gauge                 = 5;
+    Rate rate                   = 6;
+    Histogram histogram         = 7;
   }
 }
 
