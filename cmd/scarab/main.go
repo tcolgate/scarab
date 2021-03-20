@@ -10,7 +10,6 @@ import (
 	_ "github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/tcolgate/scarab"
 	pb "github.com/tcolgate/scarab/pb"
-	"github.com/tcolgate/scarab/ui"
 	"google.golang.org/grpc"
 )
 
@@ -131,5 +130,5 @@ func main() {
 		return
 	}
 
-	ui.Server(uiAddr, mngr)
+	scarab.Server(uiAddr, mngr)
 }

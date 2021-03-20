@@ -71,3 +71,28 @@ message RunJobRequest {
 message JobMetrics {
   repeated io.prometheus.client.MetricFamily metrics = 1;
 }
+
+message StartJobRequest {
+}
+
+message StartJobResponse {
+}
+
+message ListProfilesRequest {
+}
+
+message ListProfilesResponse {
+}
+
+message WatchActiveJobsRequest {
+}
+
+message WatchActiveJobsResponse {
+}
+
+service ManagerUI {
+  rpc StartJob (StartJobRequest) returns (StartJobResponse) {};
+  rpc ListProfiles (ListProfilesRequest) returns (ListProfilesResponse) {};
+  rpc WatchActiveJobs (WatchActiveJobsRequest) returns (stream WatchActiveJobsResponse) {};
+}
+

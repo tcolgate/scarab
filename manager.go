@@ -6,13 +6,12 @@ import (
 	"time"
 
 	pb "github.com/tcolgate/scarab/pb"
-	"github.com/tcolgate/scarab/ui"
 )
 
 // Manager implments the leaders service.
 type Manager struct {
 	pb.UnimplementedManagerServer
-	ui.UnimplementedManagerUIServer
+	pb.UnimplementedManagerUIServer
 
 	profiles ProfileRegistry
 
@@ -58,17 +57,17 @@ func (s *Manager) RunProfile(name, version string) error {
 	return nil
 }
 
-func (*Manager) StartJob(context.Context, *ui.StartJobRequest) (*ui.StartJobResponse, error) {
+func (*Manager) StartJob(context.Context, *pb.StartJobRequest) (*pb.StartJobResponse, error) {
 	log.Printf("Start Job called")
-	return &ui.StartJobResponse{}, nil
+	return &pb.StartJobResponse{}, nil
 }
 
-func (*Manager) ListProfiles(context.Context, *ui.ListProfilesRequest) (*ui.ListProfilesResponse, error) {
+func (*Manager) ListProfiles(context.Context, *pb.ListProfilesRequest) (*pb.ListProfilesResponse, error) {
 	log.Printf("List Profiles called")
-	return &ui.ListProfilesResponse{}, nil
+	return &pb.ListProfilesResponse{}, nil
 }
 
-func (*Manager) WatchActiveJobs(*ui.WatchActiveJobsRequest, ui.ManagerUI_WatchActiveJobsServer) error {
+func (*Manager) WatchActiveJobs(*pb.WatchActiveJobsRequest, pb.ManagerUI_WatchActiveJobsServer) error {
 	log.Printf("Watch active jobs")
 	return nil
 }
