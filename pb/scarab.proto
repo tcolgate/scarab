@@ -1,9 +1,30 @@
 // This file is part of scarab.
 
+
 syntax = "proto3";
 option go_package = "github.com/tcolgate/scarab/scarab";
 
+
 package scarab;
+
+import 'metrics.proto'; // import prom metrics definitions
+
+message StartJobRequest {
+}
+
+message StartJobResponse {
+}
+
+message ListProfilesRequest {
+}
+
+message ListProfilesResponse {
+}
+
+service ManagerUI {
+  rpc StartJob (StartJobRequest) returns (StartJobResponse) {};
+  rpc ListProfiles (ListProfilesRequest) returns (ListProfilesResponse) {};
+}
 
 service Manager {
   rpc RegisterProfile (RegisterProfileRequest) returns (stream KeepAlive) {};
@@ -45,7 +66,7 @@ message ReportLoadRequest {
 }
 
 message LoadMetrics {
-  repeated MetricFamily metrics = 1;
+  repeated io.prometheus.client.MetricFamily metrics = 1;
 }
 
 message JobArg {
@@ -64,38 +85,6 @@ message RunJobRequest {
   repeated JobArg args = 4;
 }
 
-message Counter {
-  float value = 1;
-}
-
-message Gauge {
-  float value = 1;
-}
-
-message Rate {
-  float value    = 1;
-  float duration = 2;
-}
-
-message Histogram {
-}
-
-message Metric {
-  map<string, string> labels    = 1;
-  oneof value {
-    Counter counter             = 2;
-    Gauge gauge                 = 3;
-    Rate rate                   = 4;
-    Histogram histogram         = 5;
-  }
-}
-
-message MetricFamily {
-  string name             = 1;
-  string help             = 2;
-  repeated Metric metrics = 3;
-}
-
 message JobMetrics {
-  repeated MetricFamily metrics = 1;
+  repeated io.prometheus.client.MetricFamily metrics = 1;
 }

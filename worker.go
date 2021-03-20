@@ -5,7 +5,6 @@ import (
 	"time"
 
 	prom "github.com/prometheus/client_golang/prometheus"
-	promdto "github.com/prometheus/client_model/go"
 	pb "github.com/tcolgate/scarab/pb"
 )
 
@@ -15,28 +14,6 @@ type Worker struct {
 	reg *prom.Registry
 
 	done chan struct{}
-}
-
-func promToProto(in []*promdto.MetricFamily) []*pb.MetricFamily {
-	res := make([]*pb.MetricFamily, len(in))
-	for i := range in {
-		ms := make([]*pb.Metric, len(in[i].Metric))
-		for j := range in[i].Metric {
-			m := &pb.Metric{}
-			ls := make(map[string]string)
-			for _, l := range in[i].Metric[j].Label {
-				ls[*l.Name] = *l.Value
-			}
-			m.Labels = ls
-			ms[j] = m
-		}
-		res[i] = &pb.MetricFamily{
-			Name:    *in[i].Name,
-			Help:    *in[i].Help,
-			Metrics: ms,
-		}
-	}
-	return res
 }
 
 func NewWorker() (*Worker, error) {
@@ -74,7 +51,7 @@ func (s *Worker) ReportLoad(req *pb.ReportLoadRequest, stream pb.Worker_ReportLo
 			if err != nil {
 				continue
 			}
-			stream.Send(&pb.LoadMetrics{Metrics: promToProto(ms)})
+			stream.Send(&pb.LoadMetrics{Metrics: ms})
 		}
 	}
 	return nil
