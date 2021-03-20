@@ -10,7 +10,7 @@ import (
 )
 
 //go:generate protoc -I. --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative     ui.proto
-//go:generate protoc -I. --js_out=import_style=commonjs:./src --grpc-web_out=import_style=commonjs,mode=grpcwebtext:./src ui.proto
+//go:generate protoc -I. --js_out=import_style=commonjs:./src --grpc-web_out=import_style=typescript,mode=grpcwebtext:./src ui.proto
 
 //go:embed dist
 var staticFiles embed.FS
