@@ -76,23 +76,70 @@ export namespace ProfileArg {
   }
 }
 
-export class RegisterProfileRequest extends jspb.Message {
+export class ProfileSpec extends jspb.Message {
   getProfile(): string;
   setProfile(value: string): void;
 
   getVersion(): string;
   setVersion(value: string): void;
 
+  clearArgsList(): void;
+  getArgsList(): Array<ProfileArg>;
+  setArgsList(value: Array<ProfileArg>): void;
+  addArgs(value?: ProfileArg, index?: number): ProfileArg;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProfileSpec.AsObject;
+  static toObject(includeInstance: boolean, msg: ProfileSpec): ProfileSpec.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ProfileSpec, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProfileSpec;
+  static deserializeBinaryFromReader(message: ProfileSpec, reader: jspb.BinaryReader): ProfileSpec;
+}
+
+export namespace ProfileSpec {
+  export type AsObject = {
+    profile: string,
+    version: string,
+    argsList: Array<ProfileArg.AsObject>,
+  }
+}
+
+export class WorkerDetails extends jspb.Message {
   getAddr(): string;
   setAddr(value: string): void;
 
   getName(): string;
   setName(value: string): void;
 
-  clearArgsList(): void;
-  getArgsList(): Array<ProfileArg>;
-  setArgsList(value: Array<ProfileArg>): void;
-  addArgs(value?: ProfileArg, index?: number): ProfileArg;
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): WorkerDetails.AsObject;
+  static toObject(includeInstance: boolean, msg: WorkerDetails): WorkerDetails.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: WorkerDetails, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): WorkerDetails;
+  static deserializeBinaryFromReader(message: WorkerDetails, reader: jspb.BinaryReader): WorkerDetails;
+}
+
+export namespace WorkerDetails {
+  export type AsObject = {
+    addr: string,
+    name: string,
+  }
+}
+
+export class RegisterProfileRequest extends jspb.Message {
+  hasSpec(): boolean;
+  clearSpec(): void;
+  getSpec(): ProfileSpec | undefined;
+  setSpec(value?: ProfileSpec): void;
+
+  hasWorker(): boolean;
+  clearWorker(): void;
+  getWorker(): WorkerDetails | undefined;
+  setWorker(value?: WorkerDetails): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): RegisterProfileRequest.AsObject;
@@ -106,11 +153,8 @@ export class RegisterProfileRequest extends jspb.Message {
 
 export namespace RegisterProfileRequest {
   export type AsObject = {
-    profile: string,
-    version: string,
-    addr: string,
-    name: string,
-    argsList: Array<ProfileArg.AsObject>,
+    spec?: ProfileSpec.AsObject,
+    worker?: WorkerDetails.AsObject,
   }
 }
 
@@ -299,7 +343,40 @@ export namespace StartJobResponse {
   }
 }
 
+export class RegiteredProfile extends jspb.Message {
+  hasSpec(): boolean;
+  clearSpec(): void;
+  getSpec(): ProfileSpec | undefined;
+  setSpec(value?: ProfileSpec): void;
+
+  clearWorkersList(): void;
+  getWorkersList(): Array<WorkerDetails>;
+  setWorkersList(value: Array<WorkerDetails>): void;
+  addWorkers(value?: WorkerDetails, index?: number): WorkerDetails;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): RegiteredProfile.AsObject;
+  static toObject(includeInstance: boolean, msg: RegiteredProfile): RegiteredProfile.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: RegiteredProfile, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): RegiteredProfile;
+  static deserializeBinaryFromReader(message: RegiteredProfile, reader: jspb.BinaryReader): RegiteredProfile;
+}
+
+export namespace RegiteredProfile {
+  export type AsObject = {
+    spec?: ProfileSpec.AsObject,
+    workersList: Array<WorkerDetails.AsObject>,
+  }
+}
+
 export class ListProfilesRequest extends jspb.Message {
+  clearRegisteredList(): void;
+  getRegisteredList(): Array<RegiteredProfile>;
+  setRegisteredList(value: Array<RegiteredProfile>): void;
+  addRegistered(value?: RegiteredProfile, index?: number): RegiteredProfile;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListProfilesRequest.AsObject;
   static toObject(includeInstance: boolean, msg: ListProfilesRequest): ListProfilesRequest.AsObject;
@@ -312,6 +389,7 @@ export class ListProfilesRequest extends jspb.Message {
 
 export namespace ListProfilesRequest {
   export type AsObject = {
+    registeredList: Array<RegiteredProfile.AsObject>,
   }
 }
 

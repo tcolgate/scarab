@@ -17,22 +17,30 @@ message ProfileArgOption {
 }
 
 message ProfileArg {
-  string name                 = 1;
-  string description          = 2;
+  string name               = 1;
+  string description        = 2;
   oneof default {
-    string string             = 3;
-    float  float              = 4;
-    ProfileArgOption option   = 5;
+    string           string = 3;
+    float            float  = 4;
+    ProfileArgOption option = 5;
   }
 }
 
-message RegisterProfileRequest {
+message ProfileSpec {
   string profile            = 1;
   string version            = 2;
-  string addr               = 3;
-  string name               = 4;
 
-  repeated ProfileArg args  = 5;
+  repeated ProfileArg args  = 3;
+}
+
+message WorkerDetails {
+  string addr = 1;
+  string name = 2;
+}
+
+message RegisterProfileRequest {
+  ProfileSpec   spec   = 1;
+  WorkerDetails worker = 2;
 }
 
 message KeepAlive{
@@ -78,7 +86,13 @@ message StartJobRequest {
 message StartJobResponse {
 }
 
+message RegiteredProfile {
+  ProfileSpec            spec    = 1;
+  repeated WorkerDetails workers = 2;
+}
+
 message ListProfilesRequest {
+  repeated RegiteredProfile registered = 1;
 }
 
 message ListProfilesResponse {

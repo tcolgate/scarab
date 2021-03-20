@@ -39,7 +39,7 @@ func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Mana
 	ctx := stream.Context()
 	defer ticker.Stop()
 
-	log.Printf("registered worker for profile %s", req.Profile)
+	log.Printf("registered worker for profile %s", req.Spec)
 
 	for {
 		select {

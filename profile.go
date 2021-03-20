@@ -45,8 +45,8 @@ func (pr *ProfileRegistry) Register(req *pb.RegisterProfileRequest) (ProfileRegi
 	}
 
 	key := ProfileKey{
-		Profile: req.Profile,
-		Version: req.Version,
+		Profile: req.Spec.Profile,
+		Version: req.Spec.Version,
 	}
 
 	t := pr.now()
@@ -64,8 +64,8 @@ func (pr *ProfileRegistry) Register(req *pb.RegisterProfileRequest) (ProfileRegi
 	id := ulid.MustNew(ulid.Timestamp(t), entropy).String()
 
 	pw := ProfileWorker{
-		Addr: req.Addr,
-		Name: req.Name,
+		Addr: req.Worker.Addr,
+		Name: req.Worker.Name,
 		ID:   id,
 	}
 
