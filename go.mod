@@ -6,6 +6,7 @@ require (
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/improbable-eng/grpc-web v0.14.0
+	github.com/oklog/ulid v1.3.1
 	github.com/prometheus/client_golang v1.5.1-0.20210129212427-08104a0ef98e
 	github.com/prometheus/client_model v0.2.1-0.20200406191659-4b803f3550a4
 	github.com/rs/cors v1.7.0 // indirect

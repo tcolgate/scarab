@@ -28,10 +28,11 @@ message ProfileArg {
 
 message RegisterProfileRequest {
   string profile            = 1;
-  string addr               = 2;
-  string name               = 3;
+  string version            = 2;
+  string addr               = 3;
+  string name               = 4;
 
-  repeated ProfileArg args = 4;
+  repeated ProfileArg args  = 5;
 }
 
 message KeepAlive{
