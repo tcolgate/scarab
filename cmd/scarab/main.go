@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/tcolgate/scarab"
 	pb "github.com/tcolgate/scarab/pb"
 	"google.golang.org/grpc"
