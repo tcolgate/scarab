@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ManagerUIClient interface {
 	StartJob(ctx context.Context, in *StartJobRequest, opts ...grpc.CallOption) (*StartJobResponse, error)
 	ListProfiles(ctx context.Context, in *ListProfilesRequest, opts ...grpc.CallOption) (*ListProfilesResponse, error)
+	WatchActiveJobs(ctx context.Context, in *WatchActiveJobsRequest, opts ...grpc.CallOption) (ManagerUI_WatchActiveJobsClient, error)
 }
 
 type managerUIClient struct {
@@ -48,12 +49,45 @@ func (c *managerUIClient) ListProfiles(ctx context.Context, in *ListProfilesRequ
 	return out, nil
 }
 
+func (c *managerUIClient) WatchActiveJobs(ctx context.Context, in *WatchActiveJobsRequest, opts ...grpc.CallOption) (ManagerUI_WatchActiveJobsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ManagerUI_ServiceDesc.Streams[0], "/ui.ManagerUI/WatchActiveJobs", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &managerUIWatchActiveJobsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ManagerUI_WatchActiveJobsClient interface {
+	Recv() (*WatchActiveJobsResponse, error)
+	grpc.ClientStream
+}
+
+type managerUIWatchActiveJobsClient struct {
+	grpc.ClientStream
+}
+
+func (x *managerUIWatchActiveJobsClient) Recv() (*WatchActiveJobsResponse, error) {
+	m := new(WatchActiveJobsResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ManagerUIServer is the server API for ManagerUI service.
 // All implementations must embed UnimplementedManagerUIServer
 // for forward compatibility
 type ManagerUIServer interface {
 	StartJob(context.Context, *StartJobRequest) (*StartJobResponse, error)
 	ListProfiles(context.Context, *ListProfilesRequest) (*ListProfilesResponse, error)
+	WatchActiveJobs(*WatchActiveJobsRequest, ManagerUI_WatchActiveJobsServer) error
 	mustEmbedUnimplementedManagerUIServer()
 }
 
@@ -66,6 +100,9 @@ func (UnimplementedManagerUIServer) StartJob(context.Context, *StartJobRequest) 
 }
 func (UnimplementedManagerUIServer) ListProfiles(context.Context, *ListProfilesRequest) (*ListProfilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProfiles not implemented")
+}
+func (UnimplementedManagerUIServer) WatchActiveJobs(*WatchActiveJobsRequest, ManagerUI_WatchActiveJobsServer) error {
+	return status.Errorf(codes.Unimplemented, "method WatchActiveJobs not implemented")
 }
 func (UnimplementedManagerUIServer) mustEmbedUnimplementedManagerUIServer() {}
 
@@ -116,6 +153,27 @@ func _ManagerUI_ListProfiles_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ManagerUI_WatchActiveJobs_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(WatchActiveJobsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ManagerUIServer).WatchActiveJobs(m, &managerUIWatchActiveJobsServer{stream})
+}
+
+type ManagerUI_WatchActiveJobsServer interface {
+	Send(*WatchActiveJobsResponse) error
+	grpc.ServerStream
+}
+
+type managerUIWatchActiveJobsServer struct {
+	grpc.ServerStream
+}
+
+func (x *managerUIWatchActiveJobsServer) Send(m *WatchActiveJobsResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // ManagerUI_ServiceDesc is the grpc.ServiceDesc for ManagerUI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -132,6 +190,12 @@ var ManagerUI_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ManagerUI_ListProfiles_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "WatchActiveJobs",
+			Handler:       _ManagerUI_WatchActiveJobs_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "ui.proto",
 }
