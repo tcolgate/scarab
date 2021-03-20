@@ -3,6 +3,8 @@ package ui
 import (
 	"embed"
 	_ "embed"
+	"io/fs"
+	"log"
 	"net/http"
 
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
@@ -15,22 +17,35 @@ import (
 //go:embed dist
 var staticFiles embed.FS
 
-func server() {
-	grpcServer := grpc.Server()
+func getFileSystem() http.FileSystem {
+	fsys, err := fs.Sub(staticFiles, "dist")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return http.FS(fsys)
+}
+
+func Server(addr string, uiSrvr ManagerUIServer) {
+	var opts []grpc.ServerOption
+
+	grpcServer := grpc.NewServer(opts...)
+	RegisterManagerUIServer(grpcServer, uiSrvr)
+
 	wrappedGrpc := grpcweb.WrapServer(grpcServer)
 
-	var staticFS = http.FS(staticFiles)
-	fs := http.FileServer(staticFS)
+	fs := http.FileServer(getFileSystem())
 
 	mux := http.NewServeMux()
 	// Serve static files
 	mux.Handle("/", fs)
 
-	tlsHttpServer.Handler = http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+	h := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if wrappedGrpc.IsGrpcWebRequest(req) {
 			wrappedGrpc.ServeHTTP(resp, req)
 		}
 		// Fall back to other servers.
 		mux.ServeHTTP(resp, req)
 	})
+
+	http.ListenAndServe(":8081", h)
 }

@@ -2,8 +2,7 @@ import {grpc} from "@improbable-eng/grpc-web";
 import { ManagerUI } from './ui_pb_service';
 import { ListProfilesRequest, ListProfilesResponse, StartJobRequest, StartJobResponse } from './ui_pb';
 
-declare const USE_TLS: boolean;
-const host = USE_TLS ? "https://localhost:9091" : "http://localhost:9090";
+const host = "http://localhost:8081";
 
 function listProfiles() {
     const lpRequest = new ListProfilesRequest();
@@ -22,3 +21,4 @@ function listProfiles() {
         });
 }
 
+listProfiles()

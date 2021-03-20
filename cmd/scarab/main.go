@@ -6,16 +6,17 @@ import (
 	"log"
 	"net"
 	"os"
-	"time"
 
 	_ "github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/tcolgate/scarab"
 	pb "github.com/tcolgate/scarab/pb"
+	"github.com/tcolgate/scarab/ui"
 	"google.golang.org/grpc"
 )
 
 func main() {
 	addr := ":8080"
+	uiAddr := ":8081"
 	serverAddr := "127.0.0.1:8080"
 	flag.Parse()
 	lis, err := net.Listen("tcp", addr)
@@ -49,6 +50,7 @@ func main() {
 		return
 	}
 	defer conn.Close()
+
 	worker := pb.NewManagerClient(conn)
 
 	profileArgs := []*pb.ProfileArg{
@@ -74,12 +76,11 @@ func main() {
 	go func() {
 		// throw away the keepalives.
 		for {
-			msg, err := cli.Recv()
+			_, err := cli.Recv()
 			if err != nil {
 				log.Printf("error getting keepalive, %#v", err)
 				return
 			}
-			log.Printf("keepalive: %#v", msg)
 		}
 	}()
 
@@ -97,11 +98,9 @@ func main() {
 		for {
 			msg, err := loadrep.Recv()
 			if err != nil {
-				log.Printf("error getting loadreport, %#v", err)
 				return
 			}
-			for i := range msg.Metrics {
-				log.Printf("loadreport: %#v", msg.Metrics[i])
+			for range msg.Metrics {
 			}
 		}
 	}()
@@ -115,12 +114,11 @@ func main() {
 	go func() {
 		// throw away the keepalives.
 		for {
-			msg, err := rjsrc.Recv()
+			_, err := rjsrc.Recv()
 			if err != nil {
 				log.Printf("error getting loadreport, %#v", err)
 				return
 			}
-			log.Printf("metric %#v", msg)
 		}
 	}()
 
@@ -132,6 +130,6 @@ func main() {
 		log.Panicf("runjub error, %v", err)
 		return
 	}
-	time.Sleep(10 * time.Second)
 
+	ui.Server(uiAddr, mngr)
 }
