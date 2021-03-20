@@ -4,27 +4,9 @@
 syntax = "proto3";
 option go_package = "github.com/tcolgate/scarab/scarab";
 
-
 package scarab;
 
 import 'metrics.proto'; // import prom metrics definitions
-
-message StartJobRequest {
-}
-
-message StartJobResponse {
-}
-
-message ListProfilesRequest {
-}
-
-message ListProfilesResponse {
-}
-
-service ManagerUI {
-  rpc StartJob (StartJobRequest) returns (StartJobResponse) {};
-  rpc ListProfiles (ListProfilesRequest) returns (ListProfilesResponse) {};
-}
 
 service Manager {
   rpc RegisterProfile (RegisterProfileRequest) returns (stream KeepAlive) {};
