@@ -19,6 +19,15 @@ type Manager struct {
 	done chan struct{}
 }
 
+func NewManager() *Manager {
+	return &Manager{
+		profiles: ProfileRegistry{
+			now: time.Now,
+		},
+		done: make(chan struct{}),
+	}
+}
+
 func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Manager_RegisterProfileServer) error {
 	log.Printf("RegisterProfile")
 	reg, err := s.profiles.Register(req)

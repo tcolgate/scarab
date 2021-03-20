@@ -14,11 +14,11 @@ import (
 //go:generate protoc -I. --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative     ui.proto
 //go:generate protoc -I. --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --js_out=import_style=commonjs,binary:./src --ts_out=service=grpc-web:./src ui.proto
 
-//go:embed dist
+//go:embed build
 var staticFiles embed.FS
 
 func getFileSystem() http.FileSystem {
-	fsys, err := fs.Sub(staticFiles, "dist")
+	fsys, err := fs.Sub(staticFiles, "build")
 	if err != nil {
 		log.Fatal(err)
 	}

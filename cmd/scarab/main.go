@@ -27,7 +27,7 @@ func main() {
 
 	grpcServer := grpc.NewServer(opts...)
 
-	mngr := &scarab.Manager{}
+	mngr := scarab.NewManager()
 	wrkr, err := scarab.NewWorker()
 	if err != nil {
 		log.Fatalf("failed to create worker: %v", err)
