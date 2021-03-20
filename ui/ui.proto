@@ -1,0 +1,25 @@
+// This file is part of scarab.
+
+
+syntax = "proto3";
+option go_package = "github.com/tcolgate/scarab/ui";
+
+package ui;
+
+message StartJobRequest {
+}
+
+message StartJobResponse {
+}
+
+message ListProfilesRequest {
+}
+
+message ListProfilesResponse {
+}
+
+service ManagerUI {
+  rpc StartJob (StartJobRequest) returns (StartJobResponse) {};
+  rpc ListProfiles (ListProfilesRequest) returns (ListProfilesResponse) {};
+}
+
