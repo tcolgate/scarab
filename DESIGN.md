@@ -35,3 +35,11 @@ can be useful when interpreting results.
 - arrange for collection of traces, from jaeger.
 
 We may also take on the responsibility of anouncing load test runs to slack.
+
+#Infrastructure
+
+- grpc between componenents
+  - manager and workers chart using grpc
+  - ui -> manager using grpc
+  - ui serves web conent and grpc-web
+  - ui web interface -> ui server using grpc-web
