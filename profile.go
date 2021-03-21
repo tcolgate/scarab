@@ -1,8 +1,8 @@
 package scarab
 
 import (
+	"context"
 	"math/rand"
-	"sync"
 	"time"
 
 	"github.com/oklog/ulid"
@@ -25,101 +25,154 @@ type ProfileWorker struct {
 	ID   string
 	Name string
 }
+
 type Profile struct {
 	FirstRegistration time.Time
 	Args              []*pb.ProfileArg
 	Workers           map[ProfileRegistration]struct{}
 }
 
+type profRegResp struct {
+	err error
+	reg ProfileRegistration
+}
+
+type profReg struct {
+	*pb.RegisterProfileRequest
+	resp chan profRegResp
+}
+
+type profSubResp struct {
+	id string
+	ch chan []*pb.WorkerDetails
+}
+
+type profUnSubReq struct {
+	id string
+}
+
+type profSubReq struct {
+	*pb.RegisterProfileRequest
+	resp chan profRegResp
+}
+
+type proflistResp struct {
+}
+
+type proflistReq struct {
+	resp chan proflistResp
+}
+
 type ProfileRegistry struct {
-	sync.RWMutex
-	now     func() time.Time
-	entries map[ProfileKey]Profile
+	now func() time.Time
+
+	reg   chan profReg
+	unreg chan ProfileRegistration
+
+	subs   chan profSubReq
+	unsubs chan profUnSubReq
+
+	list chan proflistReq
+}
+
+type subscription struct {
+	id string
+	ch []*pb.WorkerDetails
+}
+
+func (pr *ProfileRegistry) loop(ctx context.Context) {
+	entries := map[ProfileKey]Profile{}
+	subs := map[ProfileKey][]subscription{}
+
+	t := pr.now()
+	r := rand.New(rand.NewSource(t.UnixNano()))
+	entropy := ulid.Monotonic(r, 0)
+
+	for {
+		select {
+		case <-ctx.Done():
+		case reg := <-pr.reg:
+			key := ProfileKey{
+				Profile: reg.Spec.Profile,
+				Version: reg.Spec.Version,
+			}
+
+			rt := pr.now()
+			prof, ok := entries[key]
+			if !ok {
+				prof.FirstRegistration = t
+			}
+
+			id := ulid.MustNew(ulid.Timestamp(rt), entropy).String()
+
+			pw := ProfileWorker{
+				Addr: reg.Worker.Addr,
+				Name: reg.Worker.Name,
+				ID:   id,
+			}
+
+			preg := ProfileRegistration{
+				ProfileKey:    key,
+				ProfileWorker: pw,
+			}
+
+			if prof.Workers == nil {
+				prof.Workers = make(map[ProfileRegistration]struct{})
+			}
+			prof.Workers[preg] = struct{}{}
+			entries[key] = prof
+			reg.resp <- profRegResp{
+				err: nil,
+				reg: preg,
+			}
+
+		case unreq := <-pr.unreg:
+			key := unreq.ProfileKey
+			prof := entries[key]
+			if prof.Workers == nil {
+				return
+			}
+			delete(prof.Workers, unreq)
+			entries[key] = prof
+
+		case req := <-pr.subs:
+		/*
+			key := ProfileKey{
+				Profile: profile,
+				Version: version,
+			}
+		*/
+
+		case req := <-pr.unsubs:
+
+		}
+	}
 }
 
 func (pr *ProfileRegistry) Register(req *pb.RegisterProfileRequest) (ProfileRegistration, error) {
-	pr.Lock()
-	defer pr.Unlock()
-	if pr.entries == nil {
-		pr.entries = make(map[ProfileKey]Profile)
+	ch := make(chan profRegResp)
+	defer close(ch)
+	pr.reg <- profReg{
+		RegisterProfileRequest: req,
+		resp:                   ch,
 	}
+	resp := <-ch
 
-	key := ProfileKey{
-		Profile: req.Spec.Profile,
-		Version: req.Spec.Version,
-	}
-
-	t := pr.now()
-
-	prof, ok := pr.entries[key]
-	if !ok {
-		prof.FirstRegistration = t
-	}
-
-	// TODO check the the profile request is compatible/identical
-	// with others registered for the same name/version
-
-	r := rand.New(rand.NewSource(t.UnixNano()))
-	entropy := ulid.Monotonic(r, 0)
-	id := ulid.MustNew(ulid.Timestamp(t), entropy).String()
-
-	pw := ProfileWorker{
-		Addr: req.Worker.Addr,
-		Name: req.Worker.Name,
-		ID:   id,
-	}
-
-	preg := ProfileRegistration{
-		ProfileKey:    key,
-		ProfileWorker: pw,
-	}
-
-	if prof.Workers == nil {
-		prof.Workers = make(map[ProfileRegistration]struct{})
-	}
-	prof.Workers[preg] = struct{}{}
-	pr.entries[key] = prof
-
-	return preg, nil
+	return resp.reg, resp.err
 }
 
 func (pr *ProfileRegistry) Unregister(preg ProfileRegistration) {
-	pr.Lock()
-	defer pr.Unlock()
-
-	if pr.entries == nil {
-		return
-	}
-
-	key := preg.ProfileKey
-
-	prof := pr.entries[key]
-	if prof.Workers == nil {
-		return
-	}
-	delete(prof.Workers, preg)
-	pr.entries[key] = prof
+	pr.unreg <- preg
 }
 
 func (pr *ProfileRegistry) ListProfiles() {
-	pr.RLock()
-	defer pr.RUnlock()
+	ch := make(chan proflistResp)
+	pr.list <- proflistReq{resp: ch}
+	resp := <-ch
 }
 
 // GetProfile should return a subscription to a list of worker addresses
 func (pr *ProfileRegistry) GetProfile(profile, version string) ([]*pb.ProfileArg, []*pb.WorkerDetails) {
-	pr.RLock()
-	defer pr.RUnlock()
-
-	key := ProfileKey{
-		Profile: profile,
-		Version: version,
-	}
-
-	prof, ok := pr.entries[key]
-	if !ok {
-		return nil, nil
-	}
 	var dets []*pb.WorkerDetails
 	for w := range prof.Workers {
 		dets = append(dets, &pb.WorkerDetails{
