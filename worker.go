@@ -1,11 +1,14 @@
 package scarab
 
 import (
+	"context"
 	"log"
+	"os"
 	"time"
 
 	prom "github.com/prometheus/client_golang/prometheus"
 	pb "github.com/tcolgate/scarab/pb"
+	grpc "google.golang.org/grpc"
 )
 
 type Worker struct {
@@ -13,10 +16,11 @@ type Worker struct {
 
 	reg *prom.Registry
 
+	conn *grpc.ClientConn
 	done chan struct{}
 }
 
-func NewWorker() (*Worker, error) {
+func NewWorker(ctx context.Context, addr, serverAddr string, wrk Workload) (*Worker, error) {
 	reg := prom.NewRegistry()
 	pc := prom.NewProcessCollector(prom.ProcessCollectorOpts{})
 	gocol := prom.NewGoCollector()
@@ -30,9 +34,49 @@ func NewWorker() (*Worker, error) {
 		return nil, err
 	}
 
+	clientOpts := []grpc.DialOption{
+		grpc.WithInsecure(),
+	}
+
+	conn, err := grpc.Dial(serverAddr, clientOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	worker := pb.NewManagerClient(conn)
+
+	hn, _ := os.Hostname()
+	req := pb.RegisterProfileRequest{
+		Spec: wrk.Spec,
+		Worker: &pb.WorkerDetails{
+			Name: hn,
+			Addr: hn + addr,
+		},
+	}
+	cli, err := worker.RegisterProfile(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		// throw away the keepalives.
+		for {
+			_, err := cli.Recv()
+			if err != nil {
+				log.Printf("error getting keepalive, %#v", err)
+				return
+			}
+		}
+	}()
+
 	return &Worker{
-		reg: reg,
+		reg:  reg,
+		conn: conn,
 	}, nil
+}
+
+func (s *Worker) Close() {
+	s.conn.Close()
 }
 
 func (s *Worker) ReportLoad(req *pb.ReportLoadRequest, stream pb.Worker_ReportLoadServer) error {

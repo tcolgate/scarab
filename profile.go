@@ -105,3 +105,26 @@ func (pr *ProfileRegistry) ListProfiles() {
 	pr.RLock()
 	defer pr.RUnlock()
 }
+
+func (pr *ProfileRegistry) GetWorkers(profile, version string) []*pb.WorkerDetails {
+	pr.RLock()
+	defer pr.RUnlock()
+
+	key := ProfileKey{
+		Profile: profile,
+		Version: version,
+	}
+
+	prof, ok := pr.entries[key]
+	if !ok {
+		return nil
+	}
+	var dets []*pb.WorkerDetails
+	for w := range prof.Workers {
+		dets = append(dets, &pb.WorkerDetails{
+			Name: w.Name,
+			Addr: w.Addr,
+		})
+	}
+	return dets
+}

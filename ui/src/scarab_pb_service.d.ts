@@ -4,6 +4,15 @@
 import * as scarab_pb from "./scarab_pb";
 import {grpc} from "@improbable-eng/grpc-web";
 
+type ManagerRunProfile = {
+  readonly methodName: string;
+  readonly service: typeof Manager;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof scarab_pb.StartJobRequest;
+  readonly responseType: typeof scarab_pb.StartJobResponse;
+};
+
 type ManagerRegisterProfile = {
   readonly methodName: string;
   readonly service: typeof Manager;
@@ -15,6 +24,7 @@ type ManagerRegisterProfile = {
 
 export class Manager {
   static readonly serviceName: string;
+  static readonly RunProfile: ManagerRunProfile;
   static readonly RegisterProfile: ManagerRegisterProfile;
 }
 
@@ -108,6 +118,15 @@ export class ManagerClient {
   readonly serviceHost: string;
 
   constructor(serviceHost: string, options?: grpc.RpcOptions);
+  runProfile(
+    requestMessage: scarab_pb.StartJobRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: scarab_pb.StartJobResponse|null) => void
+  ): UnaryResponse;
+  runProfile(
+    requestMessage: scarab_pb.StartJobRequest,
+    callback: (error: ServiceError|null, responseMessage: scarab_pb.StartJobResponse|null) => void
+  ): UnaryResponse;
   registerProfile(requestMessage: scarab_pb.RegisterProfileRequest, metadata?: grpc.Metadata): ResponseStream<scarab_pb.KeepAlive>;
 }
 

@@ -10,6 +10,15 @@ var Manager = (function () {
   return Manager;
 }());
 
+Manager.RunProfile = {
+  methodName: "RunProfile",
+  service: Manager,
+  requestStream: false,
+  responseStream: false,
+  requestType: scarab_pb.StartJobRequest,
+  responseType: scarab_pb.StartJobResponse
+};
+
 Manager.RegisterProfile = {
   methodName: "RegisterProfile",
   service: Manager,
@@ -25,6 +34,37 @@ function ManagerClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
+
+ManagerClient.prototype.runProfile = function runProfile(requestMessage, metadata, callback) {
+  if (arguments.length === 2) {
+    callback = arguments[1];
+  }
+  var client = grpc.unary(Manager.RunProfile, {
+    request: requestMessage,
+    host: this.serviceHost,
+    metadata: metadata,
+    transport: this.options.transport,
+    debug: this.options.debug,
+    onEnd: function (response) {
+      if (callback) {
+        if (response.status !== grpc.Code.OK) {
+          var err = new Error(response.statusMessage);
+          err.code = response.status;
+          err.metadata = response.trailers;
+          callback(err, null);
+        } else {
+          callback(null, response.message);
+        }
+      }
+    }
+  });
+  return {
+    cancel: function () {
+      callback = null;
+      client.close();
+    }
+  };
+};
 
 ManagerClient.prototype.registerProfile = function registerProfile(requestMessage, metadata) {
   var listeners = {

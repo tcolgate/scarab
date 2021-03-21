@@ -312,6 +312,12 @@ export namespace JobMetrics {
 }
 
 export class StartJobRequest extends jspb.Message {
+  getProfile(): string;
+  setProfile(value: string): void;
+
+  getVersion(): string;
+  setVersion(value: string): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): StartJobRequest.AsObject;
   static toObject(includeInstance: boolean, msg: StartJobRequest): StartJobRequest.AsObject;
@@ -324,6 +330,8 @@ export class StartJobRequest extends jspb.Message {
 
 export namespace StartJobRequest {
   export type AsObject = {
+    profile: string,
+    version: string,
   }
 }
 

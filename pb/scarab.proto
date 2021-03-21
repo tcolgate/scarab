@@ -9,6 +9,7 @@ package scarab;
 import 'metrics.proto'; // import prom metrics definitions
 
 service Manager {
+  rpc RunProfile (StartJobRequest) returns (StartJobResponse) {};
   rpc RegisterProfile (RegisterProfileRequest) returns (stream KeepAlive) {};
 }
 
@@ -81,6 +82,8 @@ message JobMetrics {
 }
 
 message StartJobRequest {
+  string profile            = 1;
+  string version            = 2;
 }
 
 message StartJobResponse {

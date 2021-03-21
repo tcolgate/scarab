@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ManagerClient interface {
+	RunProfile(ctx context.Context, in *StartJobRequest, opts ...grpc.CallOption) (*StartJobResponse, error)
 	RegisterProfile(ctx context.Context, in *RegisterProfileRequest, opts ...grpc.CallOption) (Manager_RegisterProfileClient, error)
 }
 
@@ -27,6 +28,15 @@ type managerClient struct {
 
 func NewManagerClient(cc grpc.ClientConnInterface) ManagerClient {
 	return &managerClient{cc}
+}
+
+func (c *managerClient) RunProfile(ctx context.Context, in *StartJobRequest, opts ...grpc.CallOption) (*StartJobResponse, error) {
+	out := new(StartJobResponse)
+	err := c.cc.Invoke(ctx, "/scarab.Manager/RunProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *managerClient) RegisterProfile(ctx context.Context, in *RegisterProfileRequest, opts ...grpc.CallOption) (Manager_RegisterProfileClient, error) {
@@ -65,6 +75,7 @@ func (x *managerRegisterProfileClient) Recv() (*KeepAlive, error) {
 // All implementations must embed UnimplementedManagerServer
 // for forward compatibility
 type ManagerServer interface {
+	RunProfile(context.Context, *StartJobRequest) (*StartJobResponse, error)
 	RegisterProfile(*RegisterProfileRequest, Manager_RegisterProfileServer) error
 	mustEmbedUnimplementedManagerServer()
 }
@@ -73,6 +84,9 @@ type ManagerServer interface {
 type UnimplementedManagerServer struct {
 }
 
+func (UnimplementedManagerServer) RunProfile(context.Context, *StartJobRequest) (*StartJobResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RunProfile not implemented")
+}
 func (UnimplementedManagerServer) RegisterProfile(*RegisterProfileRequest, Manager_RegisterProfileServer) error {
 	return status.Errorf(codes.Unimplemented, "method RegisterProfile not implemented")
 }
@@ -87,6 +101,24 @@ type UnsafeManagerServer interface {
 
 func RegisterManagerServer(s grpc.ServiceRegistrar, srv ManagerServer) {
 	s.RegisterService(&Manager_ServiceDesc, srv)
+}
+
+func _Manager_RunProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartJobRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).RunProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarab.Manager/RunProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).RunProfile(ctx, req.(*StartJobRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Manager_RegisterProfile_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -116,7 +148,12 @@ func (x *managerRegisterProfileServer) Send(m *KeepAlive) error {
 var Manager_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "scarab.Manager",
 	HandlerType: (*ManagerServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "RunProfile",
+			Handler:    _Manager_RunProfile_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "RegisterProfile",

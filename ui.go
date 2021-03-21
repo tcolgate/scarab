@@ -27,7 +27,7 @@ func getFileSystem() http.FileSystem {
 	return http.FS(fsys)
 }
 
-func Server(addr string, uiSrvr pb.ManagerUIServer) {
+func UIServer(addr string, uiSrvr pb.ManagerUIServer) {
 	var opts []grpc.ServerOption
 
 	grpcServer := grpc.NewServer(opts...)

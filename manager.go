@@ -2,10 +2,12 @@ package scarab
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
 	pb "github.com/tcolgate/scarab/pb"
+	grpc "google.golang.org/grpc"
 )
 
 // Manager implments the leaders service.
@@ -35,39 +37,112 @@ func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Mana
 	}
 	defer s.profiles.Unregister(reg)
 
-	ticker := time.NewTicker(1 * time.Second)
 	ctx := stream.Context()
-	defer ticker.Stop()
 
 	log.Printf("registered worker for profile %s", req.Spec)
 
-	for {
-		select {
-		case <-ctx.Done():
-		case <-s.done:
-		case <-ticker.C:
-			stream.Send(&pb.KeepAlive{})
+	// run keepalives
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+			case <-s.done:
+			case <-ticker.C:
+				stream.Send(&pb.KeepAlive{})
+			}
 		}
+	}()
+
+	clientOpts := []grpc.DialOption{
+		grpc.WithInsecure(),
 	}
+
+	addr := req.Worker.Addr
+	srvconn, err := grpc.Dial(addr, clientOpts...)
+	if err != nil {
+		return err
+	}
+	defer srvconn.Close()
+	wcli := pb.NewWorkerClient(srvconn)
+	loadrep, err := wcli.ReportLoad(ctx, &pb.ReportLoadRequest{})
+
+	// consume load reports
+	go func() {
+		// throw away the keepalives.
+		for {
+			msg, err := loadrep.Recv()
+			if err != nil {
+				return
+			}
+			for range msg.Metrics {
+			}
+		}
+	}()
+
 	return nil
 }
 
-func (s *Manager) RunProfile(name, version string) error {
-	log.Printf("RunProfile")
-	return nil
+// RunProfile implements the UI StartJob method.
+func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.StartJobResponse, error) {
+	clientOpts := []grpc.DialOption{
+		grpc.WithInsecure(),
+	}
+
+	wrkAddrs := m.profiles.GetWorkers(j.Profile, j.Version)
+	if len(wrkAddrs) == 0 {
+		return nil, errors.New("no worker registered for requested profile")
+	}
+
+	addr := wrkAddrs[0].Addr // needs to come
+	srvconn, err := grpc.Dial(addr, clientOpts...)
+	if err != nil {
+		return nil, err
+	}
+	defer srvconn.Close()
+	wcli := pb.NewWorkerClient(srvconn)
+	rjsrc, err := wcli.RunJob(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		// throw away the keepalives.
+		for {
+			_, err := rjsrc.Recv()
+			if err != nil {
+				log.Printf("error getting loadreport, %#v", err)
+				return
+			}
+		}
+	}()
+
+	err = rjsrc.Send(&pb.RunJobRequest{
+		Profile: "myprofile",
+		Args:    []*pb.JobArg{},
+	})
+	if err != nil {
+		log.Panicf("runjub error, %v", err)
+		return nil, err
+	}
+
+	return nil, nil
 }
 
-func (*Manager) StartJob(context.Context, *pb.StartJobRequest) (*pb.StartJobResponse, error) {
+// StartJob implements the UI StartJob method.
+func (s *Manager) StartJob(ctx context.Context, j *pb.StartJobRequest) (*pb.StartJobResponse, error) {
 	log.Printf("Start Job called")
-	return &pb.StartJobResponse{}, nil
+	return s.RunProfile(ctx, j)
 }
 
-func (*Manager) ListProfiles(context.Context, *pb.ListProfilesRequest) (*pb.ListProfilesResponse, error) {
+func (s *Manager) ListProfiles(context.Context, *pb.ListProfilesRequest) (*pb.ListProfilesResponse, error) {
 	log.Printf("List Profiles called")
 	return &pb.ListProfilesResponse{}, nil
 }
 
-func (*Manager) WatchActiveJobs(*pb.WatchActiveJobsRequest, pb.ManagerUI_WatchActiveJobsServer) error {
+func (s *Manager) WatchActiveJobs(*pb.WatchActiveJobsRequest, pb.ManagerUI_WatchActiveJobsServer) error {
 	log.Printf("Watch active jobs")
+
 	return nil
 }

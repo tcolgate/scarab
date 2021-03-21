@@ -2569,7 +2569,8 @@ proto.scarab.StartJobRequest.prototype.toObject = function(opt_includeInstance) 
  */
 proto.scarab.StartJobRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-
+    profile: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    version: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -2606,6 +2607,14 @@ proto.scarab.StartJobRequest.deserializeBinaryFromReader = function(msg, reader)
     }
     var field = reader.getFieldNumber();
     switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setProfile(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setVersion(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -2635,6 +2644,56 @@ proto.scarab.StartJobRequest.prototype.serializeBinary = function() {
  */
 proto.scarab.StartJobRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getProfile();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getVersion();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string profile = 1;
+ * @return {string}
+ */
+proto.scarab.StartJobRequest.prototype.getProfile = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.scarab.StartJobRequest} returns this
+ */
+proto.scarab.StartJobRequest.prototype.setProfile = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string version = 2;
+ * @return {string}
+ */
+proto.scarab.StartJobRequest.prototype.getVersion = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.scarab.StartJobRequest} returns this
+ */
+proto.scarab.StartJobRequest.prototype.setVersion = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 

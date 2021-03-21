@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 
 	_ "github.com/improbable-eng/grpc-web/go/grpcweb"
@@ -13,6 +14,7 @@ func main() {
 	uiAddr := ":8081"
 	serverAddr := "127.0.0.1:8080"
 	flag.Parse()
+	ctx := context.Background()
 
 	spec := &pb.ProfileSpec{
 		Profile: "myworkload",
@@ -30,6 +32,5 @@ func main() {
 		Spec: spec,
 	}
 
-	scarab.NewCombined(addr, uiAddr, serverAddr, wrk)
-
+	scarab.NewCombined(ctx, addr, uiAddr, serverAddr, wrk)
 }
