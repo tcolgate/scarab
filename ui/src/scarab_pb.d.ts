@@ -26,6 +26,26 @@ export namespace ProfileArgOption {
   }
 }
 
+export class ProfileArgPerWorkerFloat extends jspb.Message {
+  getFloat(): number;
+  setFloat(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProfileArgPerWorkerFloat.AsObject;
+  static toObject(includeInstance: boolean, msg: ProfileArgPerWorkerFloat): ProfileArgPerWorkerFloat.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ProfileArgPerWorkerFloat, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProfileArgPerWorkerFloat;
+  static deserializeBinaryFromReader(message: ProfileArgPerWorkerFloat, reader: jspb.BinaryReader): ProfileArgPerWorkerFloat;
+}
+
+export namespace ProfileArgPerWorkerFloat {
+  export type AsObject = {
+    pb_float: number,
+  }
+}
+
 export class ProfileArg extends jspb.Message {
   getName(): string;
   setName(value: string): void;
@@ -48,6 +68,11 @@ export class ProfileArg extends jspb.Message {
   getOption(): ProfileArgOption | undefined;
   setOption(value?: ProfileArgOption): void;
 
+  hasWorkerfloat(): boolean;
+  clearWorkerfloat(): void;
+  getWorkerfloat(): ProfileArgPerWorkerFloat | undefined;
+  setWorkerfloat(value?: ProfileArgPerWorkerFloat): void;
+
   getDefaultCase(): ProfileArg.DefaultCase;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ProfileArg.AsObject;
@@ -66,6 +91,7 @@ export namespace ProfileArg {
     string: string,
     pb_float: number,
     option?: ProfileArgOption.AsObject,
+    workerfloat?: ProfileArgPerWorkerFloat.AsObject,
   }
 
   export enum DefaultCase {
@@ -73,6 +99,7 @@ export namespace ProfileArg {
     STRING = 3,
     FLOAT = 4,
     OPTION = 5,
+    WORKERFLOAT = 6,
   }
 }
 

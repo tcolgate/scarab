@@ -17,13 +17,19 @@ message ProfileArgOption {
   repeated string option = 1;
 }
 
+message ProfileArgPerWorkerFloat {
+  float float = 1;
+}
+
 message ProfileArg {
   string name               = 1;
   string description        = 2;
+
   oneof default {
-    string           string = 3;
-    float            float  = 4;
-    ProfileArgOption option = 5;
+    string                   string      = 3;
+    float                    float       = 4;
+    ProfileArgOption         option      = 5;
+    ProfileArgPerWorkerFloat workerFloat = 6;
   }
 }
 

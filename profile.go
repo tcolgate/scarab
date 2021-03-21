@@ -106,6 +106,7 @@ func (pr *ProfileRegistry) ListProfiles() {
 	defer pr.RUnlock()
 }
 
+// GetWorkers should return a subscription to a list of worker addresses
 func (pr *ProfileRegistry) GetWorkers(profile, version string) []*pb.WorkerDetails {
 	pr.RLock()
 	defer pr.RUnlock()
