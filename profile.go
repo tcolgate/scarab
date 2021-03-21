@@ -106,8 +106,8 @@ func (pr *ProfileRegistry) ListProfiles() {
 	defer pr.RUnlock()
 }
 
-// GetWorkers should return a subscription to a list of worker addresses
-func (pr *ProfileRegistry) GetWorkers(profile, version string) []*pb.WorkerDetails {
+// GetProfile should return a subscription to a list of worker addresses
+func (pr *ProfileRegistry) GetProfile(profile, version string) ([]*pb.ProfileArg, []*pb.WorkerDetails) {
 	pr.RLock()
 	defer pr.RUnlock()
 
@@ -118,7 +118,7 @@ func (pr *ProfileRegistry) GetWorkers(profile, version string) []*pb.WorkerDetai
 
 	prof, ok := pr.entries[key]
 	if !ok {
-		return nil
+		return nil, nil
 	}
 	var dets []*pb.WorkerDetails
 	for w := range prof.Workers {
@@ -127,5 +127,5 @@ func (pr *ProfileRegistry) GetWorkers(profile, version string) []*pb.WorkerDetai
 			Addr: w.Addr,
 		})
 	}
-	return dets
+	return prof.Args, dets
 }

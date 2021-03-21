@@ -90,7 +90,7 @@ func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.St
 		grpc.WithInsecure(),
 	}
 
-	wrkAddrs := m.profiles.GetWorkers(j.Profile, j.Version)
+	_, wrkAddrs := m.profiles.GetProfile(j.Profile, j.Version)
 	if len(wrkAddrs) == 0 {
 		return nil, errors.New("no worker registered for requested profile")
 	}
