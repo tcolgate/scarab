@@ -234,13 +234,18 @@ func (pr *ProfileRegistry) Unsubscribe(s ProfileSubscription) {
 	pr.unsubs <- s
 }
 
-func (s *ProfileSubscription) Update() bool {
-	ws, ok := <-s.workers
-	if !ok {
+func (s *ProfileSubscription) Update(ctx context.Context) bool {
+	select {
+	case ws, ok := <-s.workers:
+		if !ok {
+			return false
+		}
+		s.lastWorkers = ws
+		return true
+	case <-ctx.Done():
 		return false
+
 	}
-	s.lastWorkers = ws
-	return true
 }
 
 func (s *ProfileSubscription) ActiveWorkers() []*pb.WorkerDetails {

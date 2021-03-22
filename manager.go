@@ -91,7 +91,7 @@ func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.St
 
 	sub := m.profiles.Subscribe(j.Profile, j.Version)
 	//args := sub.Args
-	for sub.Update() {
+	for sub.Update(ctx) {
 		ws := sub.ActiveWorkers()
 		if len(ws) == 0 {
 			log.Printf("no active workers")
