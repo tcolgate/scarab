@@ -2,7 +2,6 @@ package scarab
 
 import (
 	"context"
-	"errors"
 	"log"
 	"time"
 
@@ -90,41 +89,44 @@ func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.St
 		grpc.WithInsecure(),
 	}
 
-	_, wrkAddrs := m.profiles.GetProfile(j.Profile, j.Version)
-	if len(wrkAddrs) == 0 {
-		return nil, errors.New("no worker registered for requested profile")
-	}
-
-	addr := wrkAddrs[0].Addr // needs to come
-	srvconn, err := grpc.Dial(addr, clientOpts...)
-	if err != nil {
-		return nil, err
-	}
-	defer srvconn.Close()
-	wcli := pb.NewWorkerClient(srvconn)
-	rjsrc, err := wcli.RunJob(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	go func() {
-		// throw away the keepalives.
-		for {
-			_, err := rjsrc.Recv()
-			if err != nil {
-				log.Printf("error getting loadreport, %#v", err)
-				return
-			}
+	sub := m.profiles.Subscribe(j.Profile, j.Version)
+	//args := sub.Args
+	for sub.Update() {
+		ws := sub.ActiveWorkers()
+		if len(ws) == 0 {
+			log.Printf("no active workers")
+			continue
 		}
-	}()
 
-	err = rjsrc.Send(&pb.RunJobRequest{
-		Profile: "myprofile",
-		Args:    []*pb.JobArg{},
-	})
-	if err != nil {
-		log.Panicf("runjub error, %v", err)
-		return nil, err
+		addr := ws[0].Addr // needs to come
+		srvconn, err := grpc.Dial(addr, clientOpts...)
+		if err != nil {
+			return nil, err
+		}
+		defer srvconn.Close()
+		wcli := pb.NewWorkerClient(srvconn)
+		rjsrc, err := wcli.RunJob(ctx)
+		if err != nil {
+			return nil, err
+		}
+		go func() {
+			// throw away the keepalives.
+			for {
+				_, err := rjsrc.Recv()
+				if err != nil {
+					log.Printf("error getting loadreport, %#v", err)
+					return
+				}
+			}
+		}()
+		err = rjsrc.Send(&pb.RunJobRequest{
+			Profile: "myprofile",
+			Args:    []*pb.JobArg{},
+		})
+		if err != nil {
+			log.Panicf("runjub error, %v", err)
+			return nil, err
+		}
 	}
 
 	return nil, nil

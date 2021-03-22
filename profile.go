@@ -2,6 +2,7 @@ package scarab
 
 import (
 	"context"
+	"log"
 	"math/rand"
 	"time"
 
@@ -21,9 +22,8 @@ type ProfileKey struct {
 }
 
 type ProfileWorker struct {
-	Addr string
-	ID   string
-	Name string
+	*pb.WorkerDetails
+	ID string
 }
 
 type Profile struct {
@@ -35,7 +35,7 @@ type Profile struct {
 func (p *Profile) GetActiveWorkers() []*pb.WorkerDetails {
 	var ws []*pb.WorkerDetails
 	for w := range p.Workers {
-		ws = append(ws, nil)
+		ws = append(ws, w.ProfileWorker.WorkerDetails)
 	}
 	return ws
 }
@@ -107,9 +107,8 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			id := ulid.MustNew(ulid.Timestamp(rt), entropy).String()
 
 			pw := ProfileWorker{
-				Addr: reg.Worker.Addr,
-				Name: reg.Worker.Name,
-				ID:   id,
+				WorkerDetails: reg.Worker,
+				ID:            id,
 			}
 
 			preg := ProfileRegistration{
@@ -203,6 +202,7 @@ func (pr *ProfileRegistry) ListProfiles() {
 	ch := make(chan proflistResp)
 	pr.list <- proflistReq{resp: ch}
 	resp := <-ch
+	log.Printf("list %#v", resp)
 }
 
 type ProfileSubscription struct {
@@ -210,9 +210,8 @@ type ProfileSubscription struct {
 	key     ProfileKey
 	id      string
 	workers chan []*pb.WorkerDetails
-}
 
-func (*ProfileSubscription) Close() {
+	lastWorkers []*pb.WorkerDetails
 }
 
 // Subscrube subscribes to updates for the list of workers associated with a
@@ -220,7 +219,7 @@ func (*ProfileSubscription) Close() {
 func (pr *ProfileRegistry) Subscribe(profile, version string) ProfileSubscription {
 	ch := make(chan ProfileSubscription)
 
-	req := profSubReq{
+	pr.subs <- profSubReq{
 		resp: ch,
 	}
 
@@ -233,4 +232,17 @@ func (pr *ProfileRegistry) Subscribe(profile, version string) ProfileSubscriptio
 // updates
 func (pr *ProfileRegistry) Unsubscribe(s ProfileSubscription) {
 	pr.unsubs <- s
+}
+
+func (s *ProfileSubscription) Update() bool {
+	ws, ok := <-s.workers
+	if !ok {
+		return false
+	}
+	s.lastWorkers = ws
+	return true
+}
+
+func (s *ProfileSubscription) ActiveWorkers() []*pb.WorkerDetails {
+	return s.lastWorkers
 }
