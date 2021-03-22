@@ -205,6 +205,7 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 				rprof := &pb.RegiteredProfile{}
 				rprof.Spec = e.Spec
 				rprof.Workers = e.GetActiveWorkers()
+				resp.Registered = append(resp.Registered, rprof)
 			}
 			req.resp <- resp
 		}
