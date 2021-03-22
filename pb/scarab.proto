@@ -13,31 +13,32 @@ service Manager {
   rpc RegisterProfile (RegisterProfileRequest) returns (stream KeepAlive) {};
 }
 
-message ProfileArgOption {
-  repeated string option = 1;
+
+message JobArgOption {
+  repeated string option    = 1;
+  bool            multiple  = 2;
 }
 
-message ProfileArgPerWorkerFloat {
-  float float = 1;
-}
-
-message ProfileArg {
-  string name               = 1;
-  string description        = 2;
-
-  oneof default {
-    string                   string      = 3;
-    float                    float       = 4;
-    ProfileArgOption         option      = 5;
-    ProfileArgPerWorkerFloat workerFloat = 6;
+message JobArgValue {
+  oneof value {
+    string       string      = 1;
+    float        float       = 2;
+    bool         bool        = 3;
+    JobArgOption option      = 4;
   }
 }
 
-message ProfileSpec {
-  string profile            = 1;
-  string version            = 2;
+message ProfileArg {
+  string      name        = 1;
+  string      description = 2;
+  JobArgValue default     = 3;
+}
 
-  repeated ProfileArg args  = 3;
+
+message ProfileSpec {
+  string              profile  = 1;
+  string              version  = 2;
+  repeated ProfileArg args     = 3;
 }
 
 message WorkerDetails {
@@ -67,29 +68,26 @@ message LoadMetrics {
   repeated io.prometheus.client.MetricFamily metrics = 1;
 }
 
-message JobArg {
-  string name                 = 1;
-  oneof value {
-    string string             = 2;
-    float  float              = 3;
-  }
-}
-
 message RunJobRequest {
-  string profile       = 1;
-  float  interval      = 2;
-  float  maxrps        = 3;
-
-  repeated JobArg args = 4;
+  string          profile  = 1;
+  float           interval = 2;
+  float           maxrps   = 3;
+  repeated JobArg args     = 4;
 }
 
 message JobMetrics {
   repeated io.prometheus.client.MetricFamily metrics = 1;
 }
 
+message JobArg {
+  string      name  = 1;
+  JobArgValue value = 2;
+}
+
 message StartJobRequest {
-  string profile            = 1;
-  string version            = 2;
+  string          profile = 1;
+  string          version = 2;
+  repeated JobArg args    = 3;
 }
 
 message StartJobResponse {

@@ -23,7 +23,7 @@ func main() {
 			&pb.ProfileArg{
 				Name:        "host",
 				Description: "host to target",
-				Default:     &pb.ProfileArg_String_{String_: "http://myserver.default"},
+				Default:     &pb.JobArgValue{Value: &pb.JobArgValue_String_{}},
 			},
 		},
 	}

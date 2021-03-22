@@ -4,55 +4,33 @@
 import * as jspb from "google-protobuf";
 import * as metrics_pb from "./metrics_pb";
 
-export class ProfileArgOption extends jspb.Message {
+export class JobArgOption extends jspb.Message {
   clearOptionList(): void;
   getOptionList(): Array<string>;
   setOptionList(value: Array<string>): void;
   addOption(value: string, index?: number): string;
 
+  getMultiple(): boolean;
+  setMultiple(value: boolean): void;
+
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ProfileArgOption.AsObject;
-  static toObject(includeInstance: boolean, msg: ProfileArgOption): ProfileArgOption.AsObject;
+  toObject(includeInstance?: boolean): JobArgOption.AsObject;
+  static toObject(includeInstance: boolean, msg: JobArgOption): JobArgOption.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: ProfileArgOption, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ProfileArgOption;
-  static deserializeBinaryFromReader(message: ProfileArgOption, reader: jspb.BinaryReader): ProfileArgOption;
+  static serializeBinaryToWriter(message: JobArgOption, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): JobArgOption;
+  static deserializeBinaryFromReader(message: JobArgOption, reader: jspb.BinaryReader): JobArgOption;
 }
 
-export namespace ProfileArgOption {
+export namespace JobArgOption {
   export type AsObject = {
     optionList: Array<string>,
+    multiple: boolean,
   }
 }
 
-export class ProfileArgPerWorkerFloat extends jspb.Message {
-  getFloat(): number;
-  setFloat(value: number): void;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ProfileArgPerWorkerFloat.AsObject;
-  static toObject(includeInstance: boolean, msg: ProfileArgPerWorkerFloat): ProfileArgPerWorkerFloat.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: ProfileArgPerWorkerFloat, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ProfileArgPerWorkerFloat;
-  static deserializeBinaryFromReader(message: ProfileArgPerWorkerFloat, reader: jspb.BinaryReader): ProfileArgPerWorkerFloat;
-}
-
-export namespace ProfileArgPerWorkerFloat {
-  export type AsObject = {
-    pb_float: number,
-  }
-}
-
-export class ProfileArg extends jspb.Message {
-  getName(): string;
-  setName(value: string): void;
-
-  getDescription(): string;
-  setDescription(value: string): void;
-
+export class JobArgValue extends jspb.Message {
   hasString(): boolean;
   clearString(): void;
   getString(): string;
@@ -63,17 +41,56 @@ export class ProfileArg extends jspb.Message {
   getFloat(): number;
   setFloat(value: number): void;
 
+  hasBool(): boolean;
+  clearBool(): void;
+  getBool(): boolean;
+  setBool(value: boolean): void;
+
   hasOption(): boolean;
   clearOption(): void;
-  getOption(): ProfileArgOption | undefined;
-  setOption(value?: ProfileArgOption): void;
+  getOption(): JobArgOption | undefined;
+  setOption(value?: JobArgOption): void;
 
-  hasWorkerfloat(): boolean;
-  clearWorkerfloat(): void;
-  getWorkerfloat(): ProfileArgPerWorkerFloat | undefined;
-  setWorkerfloat(value?: ProfileArgPerWorkerFloat): void;
+  getValueCase(): JobArgValue.ValueCase;
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): JobArgValue.AsObject;
+  static toObject(includeInstance: boolean, msg: JobArgValue): JobArgValue.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: JobArgValue, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): JobArgValue;
+  static deserializeBinaryFromReader(message: JobArgValue, reader: jspb.BinaryReader): JobArgValue;
+}
 
-  getDefaultCase(): ProfileArg.DefaultCase;
+export namespace JobArgValue {
+  export type AsObject = {
+    string: string,
+    pb_float: number,
+    bool: boolean,
+    option?: JobArgOption.AsObject,
+  }
+
+  export enum ValueCase {
+    VALUE_NOT_SET = 0,
+    STRING = 1,
+    FLOAT = 2,
+    BOOL = 3,
+    OPTION = 4,
+  }
+}
+
+export class ProfileArg extends jspb.Message {
+  getName(): string;
+  setName(value: string): void;
+
+  getDescription(): string;
+  setDescription(value: string): void;
+
+  hasDefault(): boolean;
+  clearDefault(): void;
+  getDefault(): JobArgValue | undefined;
+  setDefault(value?: JobArgValue): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ProfileArg.AsObject;
   static toObject(includeInstance: boolean, msg: ProfileArg): ProfileArg.AsObject;
@@ -88,18 +105,7 @@ export namespace ProfileArg {
   export type AsObject = {
     name: string,
     description: string,
-    string: string,
-    pb_float: number,
-    option?: ProfileArgOption.AsObject,
-    workerfloat?: ProfileArgPerWorkerFloat.AsObject,
-  }
-
-  export enum DefaultCase {
-    DEFAULT_NOT_SET = 0,
-    STRING = 3,
-    FLOAT = 4,
-    OPTION = 5,
-    WORKERFLOAT = 6,
+    pb_default?: JobArgValue.AsObject,
   }
 }
 
@@ -243,45 +249,6 @@ export namespace LoadMetrics {
   }
 }
 
-export class JobArg extends jspb.Message {
-  getName(): string;
-  setName(value: string): void;
-
-  hasString(): boolean;
-  clearString(): void;
-  getString(): string;
-  setString(value: string): void;
-
-  hasFloat(): boolean;
-  clearFloat(): void;
-  getFloat(): number;
-  setFloat(value: number): void;
-
-  getValueCase(): JobArg.ValueCase;
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): JobArg.AsObject;
-  static toObject(includeInstance: boolean, msg: JobArg): JobArg.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: JobArg, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): JobArg;
-  static deserializeBinaryFromReader(message: JobArg, reader: jspb.BinaryReader): JobArg;
-}
-
-export namespace JobArg {
-  export type AsObject = {
-    name: string,
-    string: string,
-    pb_float: number,
-  }
-
-  export enum ValueCase {
-    VALUE_NOT_SET = 0,
-    STRING = 2,
-    FLOAT = 3,
-  }
-}
-
 export class RunJobRequest extends jspb.Message {
   getProfile(): string;
   setProfile(value: string): void;
@@ -338,12 +305,43 @@ export namespace JobMetrics {
   }
 }
 
+export class JobArg extends jspb.Message {
+  getName(): string;
+  setName(value: string): void;
+
+  hasValue(): boolean;
+  clearValue(): void;
+  getValue(): JobArgValue | undefined;
+  setValue(value?: JobArgValue): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): JobArg.AsObject;
+  static toObject(includeInstance: boolean, msg: JobArg): JobArg.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: JobArg, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): JobArg;
+  static deserializeBinaryFromReader(message: JobArg, reader: jspb.BinaryReader): JobArg;
+}
+
+export namespace JobArg {
+  export type AsObject = {
+    name: string,
+    value?: JobArgValue.AsObject,
+  }
+}
+
 export class StartJobRequest extends jspb.Message {
   getProfile(): string;
   setProfile(value: string): void;
 
   getVersion(): string;
   setVersion(value: string): void;
+
+  clearArgsList(): void;
+  getArgsList(): Array<JobArg>;
+  setArgsList(value: Array<JobArg>): void;
+  addArgs(value?: JobArg, index?: number): JobArg;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): StartJobRequest.AsObject;
@@ -359,6 +357,7 @@ export namespace StartJobRequest {
   export type AsObject = {
     profile: string,
     version: string,
+    argsList: Array<JobArg.AsObject>,
   }
 }
 
