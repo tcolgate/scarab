@@ -32,6 +32,14 @@ type Profile struct {
 	Workers           map[ProfileRegistration]struct{}
 }
 
+func (p *Profile) GetActiveWorkers() []*pb.WorkerDetails {
+	var ws []*pb.WorkerDetails
+	for w := range p.Workers {
+		ws = append(ws, nil)
+	}
+	return ws
+}
+
 type profRegResp struct {
 	err error
 	reg ProfileRegistration
@@ -47,13 +55,11 @@ type profSubResp struct {
 	ch chan []*pb.WorkerDetails
 }
 
-type profUnSubReq struct {
-	id string
-}
-
 type profSubReq struct {
-	*pb.RegisterProfileRequest
-	resp chan profRegResp
+	profile string
+	version string
+
+	resp chan ProfileSubscription
 }
 
 type proflistResp struct {
@@ -70,19 +76,14 @@ type ProfileRegistry struct {
 	unreg chan ProfileRegistration
 
 	subs   chan profSubReq
-	unsubs chan profUnSubReq
+	unsubs chan ProfileSubscription
 
 	list chan proflistReq
 }
 
-type subscription struct {
-	id string
-	ch []*pb.WorkerDetails
-}
-
 func (pr *ProfileRegistry) loop(ctx context.Context) {
 	entries := map[ProfileKey]Profile{}
-	subs := map[ProfileKey][]subscription{}
+	subs := map[ProfileKey][]ProfileSubscription{}
 
 	t := pr.now()
 	r := rand.New(rand.NewSource(t.UnixNano()))
@@ -100,7 +101,7 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			rt := pr.now()
 			prof, ok := entries[key]
 			if !ok {
-				prof.FirstRegistration = t
+				prof.FirstRegistration = rt
 			}
 
 			id := ulid.MustNew(ulid.Timestamp(rt), entropy).String()
@@ -126,6 +127,11 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 				reg: preg,
 			}
 
+			active := prof.GetActiveWorkers()
+			for _, s := range subs[key] {
+				s.workers <- active
+			}
+
 		case unreq := <-pr.unreg:
 			key := unreq.ProfileKey
 			prof := entries[key]
@@ -134,17 +140,45 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			}
 			delete(prof.Workers, unreq)
 			entries[key] = prof
+			active := prof.GetActiveWorkers()
+			for _, s := range subs[key] {
+				s.workers <- active
+			}
 
 		case req := <-pr.subs:
-		/*
 			key := ProfileKey{
-				Profile: profile,
-				Version: version,
+				Profile: req.profile,
+				Version: req.version,
 			}
-		*/
+
+			ch := make(chan []*pb.WorkerDetails)
+			rt := pr.now()
+			id := ulid.MustNew(ulid.Timestamp(rt), entropy).String()
+			resp := ProfileSubscription{
+				key:     key,
+				id:      id,
+				workers: ch,
+			}
+			subs[key] = append(subs[key], resp)
+			req.resp <- resp
+
+			p := entries[key]
+			resp.workers <- p.GetActiveWorkers()
 
 		case req := <-pr.unsubs:
-
+			key := req.key
+			psubs := subs[req.key]
+			n := 0
+			for i, s := range psubs {
+				if s.id == req.id {
+					close(s.workers)
+					continue
+				}
+				psubs[i] = s
+				n++
+			}
+			psubs = psubs[:n]
+			subs[key] = psubs
 		}
 	}
 }
@@ -171,14 +205,32 @@ func (pr *ProfileRegistry) ListProfiles() {
 	resp := <-ch
 }
 
-// GetProfile should return a subscription to a list of worker addresses
-func (pr *ProfileRegistry) GetProfile(profile, version string) ([]*pb.ProfileArg, []*pb.WorkerDetails) {
-	var dets []*pb.WorkerDetails
-	for w := range prof.Workers {
-		dets = append(dets, &pb.WorkerDetails{
-			Name: w.Name,
-			Addr: w.Addr,
-		})
+type ProfileSubscription struct {
+	Args    []*pb.ProfileArg
+	key     ProfileKey
+	id      string
+	workers chan []*pb.WorkerDetails
+}
+
+func (*ProfileSubscription) Close() {
+}
+
+// Subscrube subscribes to updates for the list of workers associated with a
+// profile.
+func (pr *ProfileRegistry) Subscribe(profile, version string) ProfileSubscription {
+	ch := make(chan ProfileSubscription)
+
+	req := profSubReq{
+		resp: ch,
 	}
-	return prof.Args, dets
+
+	resp := <-ch
+
+	return resp
+}
+
+// Unsubscribe unsubscribes a given subscription, shut down the worker
+// updates
+func (pr *ProfileRegistry) Unsubscribe(s ProfileSubscription) {
+	pr.unsubs <- s
 }
