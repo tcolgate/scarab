@@ -20,10 +20,11 @@ type Manager struct {
 }
 
 func NewManager() *Manager {
-	return &Manager{
+	mng := &Manager{
 		profiles: NewProfileRegistr(),
 		done:     make(chan struct{}),
 	}
+	return mng
 }
 
 func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Manager_RegisterProfileServer) error {
@@ -65,18 +66,12 @@ func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Mana
 	wcli := pb.NewWorkerClient(srvconn)
 	loadrep, err := wcli.ReportLoad(ctx, &pb.ReportLoadRequest{})
 
-	// consume load reports
-	go func() {
-		// throw away the keepalives.
-		for {
-			msg, err := loadrep.Recv()
-			if err != nil {
-				return
-			}
-			for range msg.Metrics {
-			}
+	for {
+		_, err := loadrep.Recv()
+		if err != nil {
+			return err
 		}
-	}()
+	}
 
 	return nil
 }
@@ -136,9 +131,9 @@ func (s *Manager) StartJob(ctx context.Context, j *pb.StartJobRequest) (*pb.Star
 	return s.RunProfile(ctx, j)
 }
 
-func (s *Manager) ListProfiles(context.Context, *pb.ListProfilesRequest) (*pb.ListProfilesResponse, error) {
+func (s *Manager) ListProfiles(ctx context.Context, req *pb.ListProfilesRequest) (*pb.ListProfilesResponse, error) {
 	log.Printf("List Profiles called")
-	return &pb.ListProfilesResponse{}, nil
+	return s.profiles.ListProfiles(ctx, req)
 }
 
 func (s *Manager) WatchActiveJobs(*pb.WatchActiveJobsRequest, pb.ManagerUI_WatchActiveJobsServer) error {

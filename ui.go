@@ -41,6 +41,7 @@ func UIServer(addr string, uiSrvr pb.ManagerUIServer) {
 	h := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if wrappedGrpc.IsGrpcWebRequest(req) {
 			wrappedGrpc.ServeHTTP(resp, req)
+			return
 		}
 		// Fall back to other servers.
 		mux.ServeHTTP(resp, req)

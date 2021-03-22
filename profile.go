@@ -2,6 +2,7 @@ package scarab
 
 import (
 	"context"
+	"log"
 	"math/rand"
 	"time"
 
@@ -79,7 +80,7 @@ type ProfileRegistry struct {
 }
 
 func NewProfileRegistr() *ProfileRegistry {
-	return &ProfileRegistry{
+	pr := &ProfileRegistry{
 		now:   time.Now,
 		reg:   make(chan profReg),
 		unreg: make(chan ProfileRegistration),
@@ -90,6 +91,8 @@ func NewProfileRegistr() *ProfileRegistry {
 		list: make(chan *proflistReq),
 	}
 
+	go pr.loop(context.TODO())
+	return pr
 }
 
 func (pr *ProfileRegistry) loop(ctx context.Context) {
@@ -101,9 +104,11 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 	entropy := ulid.Monotonic(r, 0)
 
 	for {
+		log.Printf("loop")
 		select {
 		case <-ctx.Done():
 		case reg := <-pr.reg:
+			log.Printf("loop reg")
 			key := ProfileKey{
 				Profile: reg.Spec.Profile,
 				Version: reg.Spec.Version,
@@ -143,6 +148,7 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			}
 
 		case unreq := <-pr.unreg:
+			log.Printf("loop unreg")
 			key := unreq.ProfileKey
 			prof := entries[key]
 			if prof.Workers == nil {
@@ -156,6 +162,7 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			}
 
 		case req := <-pr.subs:
+			log.Printf("loop subs")
 			key := ProfileKey{
 				Profile: req.profile,
 				Version: req.version,
@@ -176,6 +183,7 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			resp.workers <- p.GetActiveWorkers()
 
 		case req := <-pr.unsubs:
+			log.Printf("loop unsubs")
 			key := req.key
 			psubs := subs[req.key]
 			n := 0
@@ -191,6 +199,7 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			subs[key] = psubs
 
 		case req := <-pr.list:
+			log.Printf("loop list")
 			resp := &pb.ListProfilesResponse{}
 			for _, e := range entries {
 				rprof := &pb.RegiteredProfile{}
@@ -248,9 +257,13 @@ func (pr *ProfileRegistry) Unsubscribe(s ProfileSubscription) {
 }
 
 func (pr *ProfileRegistry) ListProfiles(ctx context.Context, req *pb.ListProfilesRequest) (*pb.ListProfilesResponse, error) {
+	log.Printf("internal List Profiles called")
 	ch := make(chan *pb.ListProfilesResponse)
 	pr.list <- &proflistReq{resp: ch, req: req}
-	return <-ch, nil
+	log.Printf("internal List message sent")
+	resp := <-ch
+	log.Printf("list profiles resp: %#v", resp)
+	return resp, nil
 }
 
 func (s *ProfileSubscription) Update(ctx context.Context) bool {
