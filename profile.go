@@ -78,6 +78,20 @@ type ProfileRegistry struct {
 	list chan *proflistReq
 }
 
+func NewProfileRegistr() *ProfileRegistry {
+	return &ProfileRegistry{
+		now:   time.Now,
+		reg:   make(chan profReg),
+		unreg: make(chan ProfileRegistration),
+
+		subs:   make(chan profSubReq),
+		unsubs: make(chan ProfileSubscription),
+
+		list: make(chan *proflistReq),
+	}
+
+}
+
 func (pr *ProfileRegistry) loop(ctx context.Context) {
 	entries := map[ProfileKey]Profile{}
 	subs := map[ProfileKey][]ProfileSubscription{}

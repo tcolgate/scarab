@@ -43,30 +43,33 @@ func NewWorker(ctx context.Context, addr, serverAddr string, wrk Workload) (*Wor
 		return nil, err
 	}
 
-	worker := pb.NewManagerClient(conn)
-
-	hn, _ := os.Hostname()
-	req := pb.RegisterProfileRequest{
-		Spec: wrk.Spec,
-		Worker: &pb.WorkerDetails{
-			Name: hn,
-			Addr: hn + addr,
-		},
-	}
-	cli, err := worker.RegisterProfile(ctx, &req)
-	if err != nil {
-		return nil, err
-	}
-
 	go func() {
-		// throw away the keepalives.
-		for {
-			_, err := cli.Recv()
-			if err != nil {
-				log.Printf("error getting keepalive, %#v", err)
-				return
-			}
+		mcli := pb.NewManagerClient(conn)
+
+		hn, _ := os.Hostname()
+		req := pb.RegisterProfileRequest{
+			Spec: wrk.Spec,
+			Worker: &pb.WorkerDetails{
+				Name: hn,
+				Addr: hn + addr,
+			},
 		}
+		cli, err := mcli.RegisterProfile(ctx, &req)
+		if err != nil {
+			log.Printf("err: %v", err)
+			return
+		}
+
+		go func() {
+			// throw away the keepalives.
+			for {
+				_, err := cli.Recv()
+				if err != nil {
+					log.Printf("error getting keepalive, %#v", err)
+					return
+				}
+			}
+		}()
 	}()
 
 	return &Worker{

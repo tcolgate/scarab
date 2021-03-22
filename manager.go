@@ -14,17 +14,15 @@ type Manager struct {
 	pb.UnimplementedManagerServer
 	pb.UnimplementedManagerUIServer
 
-	profiles ProfileRegistry
+	profiles *ProfileRegistry
 
 	done chan struct{}
 }
 
 func NewManager() *Manager {
 	return &Manager{
-		profiles: ProfileRegistry{
-			now: time.Now,
-		},
-		done: make(chan struct{}),
+		profiles: NewProfileRegistr(),
+		done:     make(chan struct{}),
 	}
 }
 
