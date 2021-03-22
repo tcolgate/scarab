@@ -360,7 +360,7 @@ if (goog.DEBUG && !COMPILED) {
  * @constructor
  */
 proto.scarab.ListProfilesRequest = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.scarab.ListProfilesRequest.repeatedFields_, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.scarab.ListProfilesRequest, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -381,7 +381,7 @@ if (goog.DEBUG && !COMPILED) {
  * @constructor
  */
 proto.scarab.ListProfilesResponse = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.scarab.ListProfilesResponse.repeatedFields_, null);
 };
 goog.inherits(proto.scarab.ListProfilesResponse, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -3250,13 +3250,6 @@ proto.scarab.RegiteredProfile.prototype.clearWorkersList = function() {
 
 
 
-/**
- * List of repeated fields within this message type.
- * @private {!Array<number>}
- * @const
- */
-proto.scarab.ListProfilesRequest.repeatedFields_ = [1];
-
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -3288,8 +3281,7 @@ proto.scarab.ListProfilesRequest.prototype.toObject = function(opt_includeInstan
  */
 proto.scarab.ListProfilesRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    registeredList: jspb.Message.toObjectList(msg.getRegisteredList(),
-    proto.scarab.RegiteredProfile.toObject, includeInstance)
+
   };
 
   if (includeInstance) {
@@ -3326,11 +3318,6 @@ proto.scarab.ListProfilesRequest.deserializeBinaryFromReader = function(msg, rea
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new proto.scarab.RegiteredProfile;
-      reader.readMessage(value,proto.scarab.RegiteredProfile.deserializeBinaryFromReader);
-      msg.addRegistered(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -3360,55 +3347,16 @@ proto.scarab.ListProfilesRequest.prototype.serializeBinary = function() {
  */
 proto.scarab.ListProfilesRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getRegisteredList();
-  if (f.length > 0) {
-    writer.writeRepeatedMessage(
-      1,
-      f,
-      proto.scarab.RegiteredProfile.serializeBinaryToWriter
-    );
-  }
 };
 
 
+
 /**
- * repeated RegiteredProfile registered = 1;
- * @return {!Array<!proto.scarab.RegiteredProfile>}
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
  */
-proto.scarab.ListProfilesRequest.prototype.getRegisteredList = function() {
-  return /** @type{!Array<!proto.scarab.RegiteredProfile>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.scarab.RegiteredProfile, 1));
-};
-
-
-/**
- * @param {!Array<!proto.scarab.RegiteredProfile>} value
- * @return {!proto.scarab.ListProfilesRequest} returns this
-*/
-proto.scarab.ListProfilesRequest.prototype.setRegisteredList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 1, value);
-};
-
-
-/**
- * @param {!proto.scarab.RegiteredProfile=} opt_value
- * @param {number=} opt_index
- * @return {!proto.scarab.RegiteredProfile}
- */
-proto.scarab.ListProfilesRequest.prototype.addRegistered = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.scarab.RegiteredProfile, opt_index);
-};
-
-
-/**
- * Clears the list making it empty but non-null.
- * @return {!proto.scarab.ListProfilesRequest} returns this
- */
-proto.scarab.ListProfilesRequest.prototype.clearRegisteredList = function() {
-  return this.setRegisteredList([]);
-};
-
-
+proto.scarab.ListProfilesResponse.repeatedFields_ = [1];
 
 
 
@@ -3441,7 +3389,8 @@ proto.scarab.ListProfilesResponse.prototype.toObject = function(opt_includeInsta
  */
 proto.scarab.ListProfilesResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-
+    registeredList: jspb.Message.toObjectList(msg.getRegisteredList(),
+    proto.scarab.RegiteredProfile.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -3478,6 +3427,11 @@ proto.scarab.ListProfilesResponse.deserializeBinaryFromReader = function(msg, re
     }
     var field = reader.getFieldNumber();
     switch (field) {
+    case 1:
+      var value = new proto.scarab.RegiteredProfile;
+      reader.readMessage(value,proto.scarab.RegiteredProfile.deserializeBinaryFromReader);
+      msg.addRegistered(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -3507,6 +3461,52 @@ proto.scarab.ListProfilesResponse.prototype.serializeBinary = function() {
  */
 proto.scarab.ListProfilesResponse.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getRegisteredList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      1,
+      f,
+      proto.scarab.RegiteredProfile.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * repeated RegiteredProfile registered = 1;
+ * @return {!Array<!proto.scarab.RegiteredProfile>}
+ */
+proto.scarab.ListProfilesResponse.prototype.getRegisteredList = function() {
+  return /** @type{!Array<!proto.scarab.RegiteredProfile>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.scarab.RegiteredProfile, 1));
+};
+
+
+/**
+ * @param {!Array<!proto.scarab.RegiteredProfile>} value
+ * @return {!proto.scarab.ListProfilesResponse} returns this
+*/
+proto.scarab.ListProfilesResponse.prototype.setRegisteredList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 1, value);
+};
+
+
+/**
+ * @param {!proto.scarab.RegiteredProfile=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.scarab.RegiteredProfile}
+ */
+proto.scarab.ListProfilesResponse.prototype.addRegistered = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.scarab.RegiteredProfile, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.scarab.ListProfilesResponse} returns this
+ */
+proto.scarab.ListProfilesResponse.prototype.clearRegisteredList = function() {
+  return this.setRegisteredList([]);
 };
 
 

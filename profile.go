@@ -2,7 +2,6 @@ package scarab
 
 import (
 	"context"
-	"log"
 	"math/rand"
 	"time"
 
@@ -28,12 +27,12 @@ type ProfileWorker struct {
 
 type Profile struct {
 	FirstRegistration time.Time
-	Args              []*pb.ProfileArg
+	Spec              *pb.ProfileSpec
 	Workers           map[ProfileRegistration]struct{}
 }
 
 func (p *Profile) GetActiveWorkers() []*pb.WorkerDetails {
-	var ws []*pb.WorkerDetails
+	ws := make([]*pb.WorkerDetails, 0, len(p.Workers))
 	for w := range p.Workers {
 		ws = append(ws, w.ProfileWorker.WorkerDetails)
 	}
@@ -62,11 +61,9 @@ type profSubReq struct {
 	resp chan ProfileSubscription
 }
 
-type proflistResp struct {
-}
-
 type proflistReq struct {
-	resp chan proflistResp
+	req  *pb.ListProfilesRequest
+	resp chan *pb.ListProfilesResponse
 }
 
 type ProfileRegistry struct {
@@ -78,7 +75,7 @@ type ProfileRegistry struct {
 	subs   chan profSubReq
 	unsubs chan ProfileSubscription
 
-	list chan proflistReq
+	list chan *proflistReq
 }
 
 func (pr *ProfileRegistry) loop(ctx context.Context) {
@@ -178,6 +175,15 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			}
 			psubs = psubs[:n]
 			subs[key] = psubs
+
+		case req := <-pr.list:
+			resp := &pb.ListProfilesResponse{}
+			for _, e := range entries {
+				rprof := &pb.RegiteredProfile{}
+				rprof.Spec = e.Spec
+				rprof.Workers = e.GetActiveWorkers()
+			}
+			req.resp <- resp
 		}
 	}
 }
@@ -196,13 +202,6 @@ func (pr *ProfileRegistry) Register(req *pb.RegisterProfileRequest) (ProfileRegi
 
 func (pr *ProfileRegistry) Unregister(preg ProfileRegistration) {
 	pr.unreg <- preg
-}
-
-func (pr *ProfileRegistry) ListProfiles() {
-	ch := make(chan proflistResp)
-	pr.list <- proflistReq{resp: ch}
-	resp := <-ch
-	log.Printf("list %#v", resp)
 }
 
 type ProfileSubscription struct {
@@ -232,6 +231,12 @@ func (pr *ProfileRegistry) Subscribe(profile, version string) ProfileSubscriptio
 // updates
 func (pr *ProfileRegistry) Unsubscribe(s ProfileSubscription) {
 	pr.unsubs <- s
+}
+
+func (pr *ProfileRegistry) ListProfiles(ctx context.Context, req *pb.ListProfilesRequest) (*pb.ListProfilesResponse, error) {
+	ch := make(chan *pb.ListProfilesResponse)
+	pr.list <- &proflistReq{resp: ch, req: req}
+	return <-ch, nil
 }
 
 func (s *ProfileSubscription) Update(ctx context.Context) bool {

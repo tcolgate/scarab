@@ -406,11 +406,6 @@ export namespace RegiteredProfile {
 }
 
 export class ListProfilesRequest extends jspb.Message {
-  clearRegisteredList(): void;
-  getRegisteredList(): Array<RegiteredProfile>;
-  setRegisteredList(value: Array<RegiteredProfile>): void;
-  addRegistered(value?: RegiteredProfile, index?: number): RegiteredProfile;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListProfilesRequest.AsObject;
   static toObject(includeInstance: boolean, msg: ListProfilesRequest): ListProfilesRequest.AsObject;
@@ -423,11 +418,15 @@ export class ListProfilesRequest extends jspb.Message {
 
 export namespace ListProfilesRequest {
   export type AsObject = {
-    registeredList: Array<RegiteredProfile.AsObject>,
   }
 }
 
 export class ListProfilesResponse extends jspb.Message {
+  clearRegisteredList(): void;
+  getRegisteredList(): Array<RegiteredProfile>;
+  setRegisteredList(value: Array<RegiteredProfile>): void;
+  addRegistered(value?: RegiteredProfile, index?: number): RegiteredProfile;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListProfilesResponse.AsObject;
   static toObject(includeInstance: boolean, msg: ListProfilesResponse): ListProfilesResponse.AsObject;
@@ -440,6 +439,7 @@ export class ListProfilesResponse extends jspb.Message {
 
 export namespace ListProfilesResponse {
   export type AsObject = {
+    registeredList: Array<RegiteredProfile.AsObject>,
   }
 }
 

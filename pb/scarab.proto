@@ -99,10 +99,10 @@ message RegiteredProfile {
 }
 
 message ListProfilesRequest {
-  repeated RegiteredProfile registered = 1;
 }
 
 message ListProfilesResponse {
+  repeated RegiteredProfile registered = 1;
 }
 
 message WatchActiveJobsRequest {
