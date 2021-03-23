@@ -7,48 +7,16 @@ option go_package = "github.com/tcolgate/scarab/scarab";
 package scarab;
 
 import 'metrics.proto'; // import prom metrics definitions
+import 'scarab-common.proto'; // import prom metrics definitions
 
 service Manager {
   rpc RunProfile (StartJobRequest) returns (StartJobResponse) {};
   rpc RegisterProfile (RegisterProfileRequest) returns (stream KeepAlive) {};
 }
 
-
-message JobArgOption {
-  repeated string option    = 1;
-  bool            multiple  = 2;
-}
-
-message JobArgValue {
-  oneof value {
-    string       string      = 1;
-    float        float       = 2;
-    bool         bool        = 3;
-    JobArgOption option      = 4;
-  }
-}
-
-message ProfileArg {
-  string      name        = 1;
-  string      description = 2;
-  JobArgValue default     = 3;
-}
-
-
-message ProfileSpec {
-  string              profile  = 1;
-  string              version  = 2;
-  repeated ProfileArg args     = 3;
-}
-
-message WorkerDetails {
-  string addr = 1;
-  string name = 2;
-}
-
 message RegisterProfileRequest {
-  ProfileSpec   spec   = 1;
-  WorkerDetails worker = 2;
+  scarab.ProfileSpec   spec   = 1;
+  scarab.WorkerDetails worker = 2;
 }
 
 message KeepAlive{
@@ -58,7 +26,6 @@ service Worker {
   rpc ReportLoad(ReportLoadRequest) returns (stream LoadMetrics) {};
   rpc RunJob(stream RunJobRequest) returns (stream JobMetrics) {};
 }
-
 
 message ReportLoadRequest {
   float interval = 1;
@@ -72,48 +39,10 @@ message RunJobRequest {
   string          profile  = 1;
   float           interval = 2;
   float           maxrps   = 3;
-  repeated JobArg args     = 4;
+  repeated scarab.JobArg args     = 4;
 }
 
 message JobMetrics {
   repeated io.prometheus.client.MetricFamily metrics = 1;
-}
-
-message JobArg {
-  string      name  = 1;
-  JobArgValue value = 2;
-}
-
-message StartJobRequest {
-  string          profile = 1;
-  string          version = 2;
-  repeated JobArg args    = 3;
-}
-
-message StartJobResponse {
-}
-
-message RegiteredProfile {
-  ProfileSpec            spec    = 1;
-  repeated WorkerDetails workers = 2;
-}
-
-message ListProfilesRequest {
-}
-
-message ListProfilesResponse {
-  repeated RegiteredProfile registered = 1;
-}
-
-message WatchActiveJobsRequest {
-}
-
-message WatchActiveJobsResponse {
-}
-
-service ManagerUI {
-  rpc StartJob (StartJobRequest) returns (StartJobResponse) {};
-  rpc ListProfiles (ListProfilesRequest) returns (ListProfilesResponse) {};
-  rpc WatchActiveJobs (WatchActiveJobsRequest) returns (stream WatchActiveJobsResponse) {};
 }
 

@@ -1,0 +1,58 @@
+// This file is part of scarab.
+
+syntax = "proto3";
+option go_package = "github.com/tcolgate/scarab/scarab";
+
+package scarab;
+
+message WorkerDetails {
+  string addr = 1;
+  string name = 2;
+}
+
+message RegiteredProfile {
+  ProfileSpec            spec    = 1;
+  repeated WorkerDetails workers = 2;
+}
+
+message ProfileArg {
+  string      name        = 1;
+  string      description = 2;
+  scarab.JobArgValue default     = 3;
+}
+
+message ProfileSpec {
+  string              profile  = 1;
+  string              version  = 2;
+  repeated ProfileArg args     = 3;
+}
+
+message JobArgOption {
+  repeated string option    = 1;
+  bool            multiple  = 2;
+}
+
+message JobArgValue {
+  oneof value {
+    string       string      = 1;
+    float        float       = 2;
+    bool         bool        = 3;
+    JobArgOption option      = 4;
+  }
+}
+
+message JobArg {
+  string      name  = 1;
+  JobArgValue value = 2;
+}
+
+message StartJobRequest {
+  string          profile = 1;
+  string          version = 2;
+  repeated JobArg args    = 3;
+}
+
+message StartJobResponse {
+}
+
+

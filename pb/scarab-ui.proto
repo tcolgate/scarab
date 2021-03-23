@@ -1,0 +1,30 @@
+// This file is part of scarab.
+
+
+syntax = "proto3";
+option go_package = "github.com/tcolgate/scarab/scarab";
+
+package scarab;
+
+import 'scarab-common.proto'; // import scarab job arg definitions
+
+message ListProfilesRequest {
+}
+
+
+message ListProfilesResponse {
+  repeated scarab.RegiteredProfile registered = 1;
+}
+
+message WatchActiveJobsRequest {
+}
+
+message WatchActiveJobsResponse {
+}
+
+service ManagerUI {
+  rpc StartJob (scarab.StartJobRequest) returns (scarab.StartJobResponse) {};
+  rpc ListProfiles (ListProfilesRequest) returns (ListProfilesResponse) {};
+  rpc WatchActiveJobs (WatchActiveJobsRequest) returns (stream WatchActiveJobsResponse) {};
+}
+

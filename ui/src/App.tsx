@@ -5,8 +5,9 @@ import Box from '@material-ui/core/Box';
 import Link from '@material-ui/core/Link';
 import ProTip from './ProTip';
 import {grpc} from "@improbable-eng/grpc-web";
-import { ManagerUI } from './scarab_pb_service';
-import { ListProfilesRequest, ListProfilesResponse, StartJobRequest, StartJobResponse } from './scarab_pb';
+import { ManagerUI } from './scarab-ui_pb_service';
+import { ListProfilesRequest, ListProfilesResponse } from './scarab-ui_pb';
+import { StartJobRequest, StartJobResponse } from './scarab-common_pb';
 
 const host = "http://localhost:8081";
 
