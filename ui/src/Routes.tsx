@@ -1,39 +1,39 @@
 import React from 'react';
 
-const Home: React.FC = () => {
+const Jobs: React.FC = () => {
     return (
-          <h1>Home</h1>
+          <h1>Jobs</h1>
         );
 };
 
-const Standings: React.FC = () => {
+const Profiles: React.FC = () => {
     return (
-          <h1>Standings</h1>
+          <h1>Profiles</h1>
         );
 };
 
-const Teams: React.FC = () => {
+const Archive: React.FC = () => {
     return (
-          <h1>Teams</h1>
+          <h1>Archive</h1>
         );
 };
 
 const Routes = [
     {
-          path: '/',
-          sidebarName: 'Home',
-          component: Home
-        },
+      path: '/',
+      sidebarName: 'Jobs',
+      component: Jobs
+    },
     {
-          path: '/standings',
-          sidebarName: 'Standings',
-          component: Standings
-        },
+      path: '/profiles',
+      sidebarName: 'Profiles',
+      component: Profiles
+    },
     {
-          path: '/teams',
-          sidebarName: 'Teams',
-          component: Teams
-        },
+      path: '/archive',
+      sidebarName: 'Archive',
+      component: Archive
+    },
 ];
 
 export default Routes;
