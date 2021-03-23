@@ -247,6 +247,9 @@ export namespace StartJobRequest {
 }
 
 export class StartJobResponse extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): StartJobResponse.AsObject;
   static toObject(includeInstance: boolean, msg: StartJobResponse): StartJobResponse.AsObject;
@@ -259,6 +262,7 @@ export class StartJobResponse extends jspb.Message {
 
 export namespace StartJobResponse {
   export type AsObject = {
+    id: string,
   }
 }
 

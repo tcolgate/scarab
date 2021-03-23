@@ -74,3 +74,39 @@ export namespace WatchActiveJobsResponse {
   }
 }
 
+export class StopJobRequest extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): StopJobRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: StopJobRequest): StopJobRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: StopJobRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): StopJobRequest;
+  static deserializeBinaryFromReader(message: StopJobRequest, reader: jspb.BinaryReader): StopJobRequest;
+}
+
+export namespace StopJobRequest {
+  export type AsObject = {
+    id: string,
+  }
+}
+
+export class StopJobResponse extends jspb.Message {
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): StopJobResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: StopJobResponse): StopJobResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: StopJobResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): StopJobResponse;
+  static deserializeBinaryFromReader(message: StopJobResponse, reader: jspb.BinaryReader): StopJobResponse;
+}
+
+export namespace StopJobResponse {
+  export type AsObject = {
+  }
+}
+

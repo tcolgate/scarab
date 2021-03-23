@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ManagerUIClient interface {
 	StartJob(ctx context.Context, in *StartJobRequest, opts ...grpc.CallOption) (*StartJobResponse, error)
+	StopJob(ctx context.Context, in *StopJobRequest, opts ...grpc.CallOption) (*StopJobResponse, error)
 	ListProfiles(ctx context.Context, in *ListProfilesRequest, opts ...grpc.CallOption) (*ListProfilesResponse, error)
 	WatchActiveJobs(ctx context.Context, in *WatchActiveJobsRequest, opts ...grpc.CallOption) (ManagerUI_WatchActiveJobsClient, error)
 }
@@ -34,6 +35,15 @@ func NewManagerUIClient(cc grpc.ClientConnInterface) ManagerUIClient {
 func (c *managerUIClient) StartJob(ctx context.Context, in *StartJobRequest, opts ...grpc.CallOption) (*StartJobResponse, error) {
 	out := new(StartJobResponse)
 	err := c.cc.Invoke(ctx, "/scarab.ManagerUI/StartJob", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerUIClient) StopJob(ctx context.Context, in *StopJobRequest, opts ...grpc.CallOption) (*StopJobResponse, error) {
+	out := new(StopJobResponse)
+	err := c.cc.Invoke(ctx, "/scarab.ManagerUI/StopJob", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +96,7 @@ func (x *managerUIWatchActiveJobsClient) Recv() (*WatchActiveJobsResponse, error
 // for forward compatibility
 type ManagerUIServer interface {
 	StartJob(context.Context, *StartJobRequest) (*StartJobResponse, error)
+	StopJob(context.Context, *StopJobRequest) (*StopJobResponse, error)
 	ListProfiles(context.Context, *ListProfilesRequest) (*ListProfilesResponse, error)
 	WatchActiveJobs(*WatchActiveJobsRequest, ManagerUI_WatchActiveJobsServer) error
 	mustEmbedUnimplementedManagerUIServer()
@@ -97,6 +108,9 @@ type UnimplementedManagerUIServer struct {
 
 func (UnimplementedManagerUIServer) StartJob(context.Context, *StartJobRequest) (*StartJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartJob not implemented")
+}
+func (UnimplementedManagerUIServer) StopJob(context.Context, *StopJobRequest) (*StopJobResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StopJob not implemented")
 }
 func (UnimplementedManagerUIServer) ListProfiles(context.Context, *ListProfilesRequest) (*ListProfilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProfiles not implemented")
@@ -131,6 +145,24 @@ func _ManagerUI_StartJob_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ManagerUIServer).StartJob(ctx, req.(*StartJobRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ManagerUI_StopJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StopJobRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerUIServer).StopJob(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarab.ManagerUI/StopJob",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerUIServer).StopJob(ctx, req.(*StopJobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -184,6 +216,10 @@ var ManagerUI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "StartJob",
 			Handler:    _ManagerUI_StartJob_Handler,
+		},
+		{
+			MethodName: "StopJob",
+			Handler:    _ManagerUI_StopJob_Handler,
 		},
 		{
 			MethodName: "ListProfiles",

@@ -20,6 +20,15 @@ ManagerUI.StartJob = {
   responseType: scarab_common_pb.StartJobResponse
 };
 
+ManagerUI.StopJob = {
+  methodName: "StopJob",
+  service: ManagerUI,
+  requestStream: false,
+  responseStream: false,
+  requestType: scarab_ui_pb.StopJobRequest,
+  responseType: scarab_ui_pb.StopJobResponse
+};
+
 ManagerUI.ListProfiles = {
   methodName: "ListProfiles",
   service: ManagerUI,
@@ -50,6 +59,37 @@ ManagerUIClient.prototype.startJob = function startJob(requestMessage, metadata,
     callback = arguments[1];
   }
   var client = grpc.unary(ManagerUI.StartJob, {
+    request: requestMessage,
+    host: this.serviceHost,
+    metadata: metadata,
+    transport: this.options.transport,
+    debug: this.options.debug,
+    onEnd: function (response) {
+      if (callback) {
+        if (response.status !== grpc.Code.OK) {
+          var err = new Error(response.statusMessage);
+          err.code = response.status;
+          err.metadata = response.trailers;
+          callback(err, null);
+        } else {
+          callback(null, response.message);
+        }
+      }
+    }
+  });
+  return {
+    cancel: function () {
+      callback = null;
+      client.close();
+    }
+  };
+};
+
+ManagerUIClient.prototype.stopJob = function stopJob(requestMessage, metadata, callback) {
+  if (arguments.length === 2) {
+    callback = arguments[1];
+  }
+  var client = grpc.unary(ManagerUI.StopJob, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,

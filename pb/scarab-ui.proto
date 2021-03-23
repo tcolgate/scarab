@@ -22,8 +22,16 @@ message WatchActiveJobsRequest {
 message WatchActiveJobsResponse {
 }
 
+message StopJobRequest {
+  string id = 1;
+}
+
+message StopJobResponse {
+}
+
 service ManagerUI {
   rpc StartJob (scarab.StartJobRequest) returns (scarab.StartJobResponse) {};
+  rpc StopJob (scarab.StopJobRequest) returns (scarab.StopJobResponse) {};
   rpc ListProfiles (ListProfilesRequest) returns (ListProfilesResponse) {};
   rpc WatchActiveJobs (WatchActiveJobsRequest) returns (stream WatchActiveJobsResponse) {};
 }

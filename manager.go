@@ -131,6 +131,11 @@ func (s *Manager) StartJob(ctx context.Context, j *pb.StartJobRequest) (*pb.Star
 	return s.RunProfile(ctx, j)
 }
 
+func (s *Manager) StopJob(ctx context.Context, j *pb.StopJobRequest) (*pb.StopJobResponse, error) {
+	log.Printf("Stop Job called")
+	return &pb.StopJobResponse{}, nil
+}
+
 func (s *Manager) ListProfiles(ctx context.Context, req *pb.ListProfilesRequest) (*pb.ListProfilesResponse, error) {
 	log.Printf("List Profiles called")
 	return s.profiles.ListProfiles(ctx, req)
