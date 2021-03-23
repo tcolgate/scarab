@@ -133,6 +133,7 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			}
 
 			if prof.Workers == nil {
+				prof.Spec = reg.Spec
 				prof.Workers = make(map[ProfileRegistration]struct{})
 			}
 			prof.Workers[preg] = struct{}{}
