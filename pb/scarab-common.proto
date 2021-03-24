@@ -5,14 +5,17 @@ option go_package = "github.com/tcolgate/scarab/scarab";
 
 package scarab;
 
+import "google/protobuf/timestamp.proto";
+
 message WorkerDetails {
   string addr = 1;
   string name = 2;
 }
 
 message RegiteredProfile {
-  ProfileSpec            spec    = 1;
-  repeated WorkerDetails workers = 2;
+  ProfileSpec               spec              = 1;
+  google.protobuf.Timestamp firstRegistration = 2;
+  repeated WorkerDetails    workers           = 3;
 }
 
 message ProfileArg {
@@ -22,9 +25,10 @@ message ProfileArg {
 }
 
 message ProfileSpec {
-  string              profile  = 1;
-  string              version  = 2;
-  repeated ProfileArg args     = 3;
+  string              profile     = 1;
+  string              version     = 2;
+  string              description = 3;
+  repeated ProfileArg args        = 4;
 }
 
 message JobArgOption {

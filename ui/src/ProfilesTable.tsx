@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
+import { Container } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
@@ -14,6 +15,18 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+
+import {grpc} from "@improbable-eng/grpc-web";
+import { ManagerUI } from './scarab-ui_pb_service';
+import { ListProfilesRequest, ListProfilesResponse } from './scarab-ui_pb';
+import { StartJobRequest, StartJobResponse } from './scarab-common_pb';
+import { ManagerUIClient } from './scarab-ui_pb_service';
+
+const host = "http://localhost:8081";
+
+function listProfiles() {
+}
+
 
 const useRowStyles = makeStyles({
     root: {
@@ -124,26 +137,59 @@ const rows = [
     createData('Gingerbread', 356, 16.0, 49, 3.9, 1.5),
 ];
 
-export default function CollapsibleTable() {
+type PTProps = {};
+
+type PTState = {
+    profiles: any,
+    error: boolean
+};
+
+class ProfilesTable extends Component<PTProps, PTState>{
+  constructor(props: PTProps) {
+    super(props);
+    this.state = {
+      profiles: new ListProfilesResponse(),
+      error: false
+    };
+  };
+  fetch = () => {
+    const req = new ListProfilesRequest();
+    const client = new ManagerUIClient(host);
+    client.listProfiles(req, (err, lpResp) => {
+      console.log(err)
+      console.log(lpResp)
+      this.setState({
+        profiles: lpResp,
+      })
+    });
+  };
+
+  componentDidMount() {
+    this.fetch();
+  };
+
+  render() {
     return (
-          <TableContainer component={Paper}>
-            <Table aria-label="collapsible table">
-              <TableHead>
-                <TableRow>
-                  <TableCell />
-                  <TableCell>Dessert (100g serving)</TableCell>
-                  <TableCell align="right">Calories</TableCell>
-                  <TableCell align="right">Fat&nbsp;(g)</TableCell>
-                  <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-                  <TableCell align="right">Protein&nbsp;(g)</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => (
-                              <Row key={row.name} row={row} />
-                            ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        );
+      <Container>
+        <TableContainer component={Paper}>
+          <Table aria-label="collapsible table">
+            <TableHead>
+              <TableRow>
+                <TableCell />
+                <TableCell>Name</TableCell>
+                <TableCell align="right">Version</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row) => (
+                            <Row key={row.name} row={row} />
+                          ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
+    );
+  }
 }
+
+export default ProfilesTable;

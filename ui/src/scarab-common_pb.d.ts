@@ -2,6 +2,7 @@
 // file: scarab-common.proto
 
 import * as jspb from "google-protobuf";
+import * as google_protobuf_timestamp_pb from "google-protobuf/google/protobuf/timestamp_pb";
 
 export class WorkerDetails extends jspb.Message {
   getAddr(): string;
@@ -33,6 +34,11 @@ export class RegiteredProfile extends jspb.Message {
   getSpec(): ProfileSpec | undefined;
   setSpec(value?: ProfileSpec): void;
 
+  hasFirstregistration(): boolean;
+  clearFirstregistration(): void;
+  getFirstregistration(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setFirstregistration(value?: google_protobuf_timestamp_pb.Timestamp): void;
+
   clearWorkersList(): void;
   getWorkersList(): Array<WorkerDetails>;
   setWorkersList(value: Array<WorkerDetails>): void;
@@ -51,6 +57,7 @@ export class RegiteredProfile extends jspb.Message {
 export namespace RegiteredProfile {
   export type AsObject = {
     spec?: ProfileSpec.AsObject,
+    firstregistration?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     workersList: Array<WorkerDetails.AsObject>,
   }
 }
@@ -92,6 +99,9 @@ export class ProfileSpec extends jspb.Message {
   getVersion(): string;
   setVersion(value: string): void;
 
+  getDescription(): string;
+  setDescription(value: string): void;
+
   clearArgsList(): void;
   getArgsList(): Array<ProfileArg>;
   setArgsList(value: Array<ProfileArg>): void;
@@ -111,6 +121,7 @@ export namespace ProfileSpec {
   export type AsObject = {
     profile: string,
     version: string,
+    description: string,
     argsList: Array<ProfileArg.AsObject>,
   }
 }

@@ -12,6 +12,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
+var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
+goog.object.extend(proto, google_protobuf_timestamp_pb);
 goog.exportSymbol('proto.scarab.JobArg', null, global);
 goog.exportSymbol('proto.scarab.JobArgOption', null, global);
 goog.exportSymbol('proto.scarab.JobArgValue', null, global);
@@ -377,7 +379,7 @@ proto.scarab.WorkerDetails.prototype.setName = function(value) {
  * @private {!Array<number>}
  * @const
  */
-proto.scarab.RegiteredProfile.repeatedFields_ = [2];
+proto.scarab.RegiteredProfile.repeatedFields_ = [3];
 
 
 
@@ -411,6 +413,7 @@ proto.scarab.RegiteredProfile.prototype.toObject = function(opt_includeInstance)
 proto.scarab.RegiteredProfile.toObject = function(includeInstance, msg) {
   var f, obj = {
     spec: (f = msg.getSpec()) && proto.scarab.ProfileSpec.toObject(includeInstance, f),
+    firstregistration: (f = msg.getFirstregistration()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     workersList: jspb.Message.toObjectList(msg.getWorkersList(),
     proto.scarab.WorkerDetails.toObject, includeInstance)
   };
@@ -455,6 +458,11 @@ proto.scarab.RegiteredProfile.deserializeBinaryFromReader = function(msg, reader
       msg.setSpec(value);
       break;
     case 2:
+      var value = new google_protobuf_timestamp_pb.Timestamp;
+      reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
+      msg.setFirstregistration(value);
+      break;
+    case 3:
       var value = new proto.scarab.WorkerDetails;
       reader.readMessage(value,proto.scarab.WorkerDetails.deserializeBinaryFromReader);
       msg.addWorkers(value);
@@ -496,10 +504,18 @@ proto.scarab.RegiteredProfile.serializeBinaryToWriter = function(message, writer
       proto.scarab.ProfileSpec.serializeBinaryToWriter
     );
   }
+  f = message.getFirstregistration();
+  if (f != null) {
+    writer.writeMessage(
+      2,
+      f,
+      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+    );
+  }
   f = message.getWorkersList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      2,
+      3,
       f,
       proto.scarab.WorkerDetails.serializeBinaryToWriter
     );
@@ -545,12 +561,49 @@ proto.scarab.RegiteredProfile.prototype.hasSpec = function() {
 
 
 /**
- * repeated WorkerDetails workers = 2;
+ * optional google.protobuf.Timestamp firstRegistration = 2;
+ * @return {?proto.google.protobuf.Timestamp}
+ */
+proto.scarab.RegiteredProfile.prototype.getFirstregistration = function() {
+  return /** @type{?proto.google.protobuf.Timestamp} */ (
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 2));
+};
+
+
+/**
+ * @param {?proto.google.protobuf.Timestamp|undefined} value
+ * @return {!proto.scarab.RegiteredProfile} returns this
+*/
+proto.scarab.RegiteredProfile.prototype.setFirstregistration = function(value) {
+  return jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.scarab.RegiteredProfile} returns this
+ */
+proto.scarab.RegiteredProfile.prototype.clearFirstregistration = function() {
+  return this.setFirstregistration(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.scarab.RegiteredProfile.prototype.hasFirstregistration = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * repeated WorkerDetails workers = 3;
  * @return {!Array<!proto.scarab.WorkerDetails>}
  */
 proto.scarab.RegiteredProfile.prototype.getWorkersList = function() {
   return /** @type{!Array<!proto.scarab.WorkerDetails>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.scarab.WorkerDetails, 2));
+    jspb.Message.getRepeatedWrapperField(this, proto.scarab.WorkerDetails, 3));
 };
 
 
@@ -559,7 +612,7 @@ proto.scarab.RegiteredProfile.prototype.getWorkersList = function() {
  * @return {!proto.scarab.RegiteredProfile} returns this
 */
 proto.scarab.RegiteredProfile.prototype.setWorkersList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 2, value);
+  return jspb.Message.setRepeatedWrapperField(this, 3, value);
 };
 
 
@@ -569,7 +622,7 @@ proto.scarab.RegiteredProfile.prototype.setWorkersList = function(value) {
  * @return {!proto.scarab.WorkerDetails}
  */
 proto.scarab.RegiteredProfile.prototype.addWorkers = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 2, opt_value, proto.scarab.WorkerDetails, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.scarab.WorkerDetails, opt_index);
 };
 
 
@@ -799,7 +852,7 @@ proto.scarab.ProfileArg.prototype.hasDefault = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.scarab.ProfileSpec.repeatedFields_ = [3];
+proto.scarab.ProfileSpec.repeatedFields_ = [4];
 
 
 
@@ -834,6 +887,7 @@ proto.scarab.ProfileSpec.toObject = function(includeInstance, msg) {
   var f, obj = {
     profile: jspb.Message.getFieldWithDefault(msg, 1, ""),
     version: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    description: jspb.Message.getFieldWithDefault(msg, 3, ""),
     argsList: jspb.Message.toObjectList(msg.getArgsList(),
     proto.scarab.ProfileArg.toObject, includeInstance)
   };
@@ -881,6 +935,10 @@ proto.scarab.ProfileSpec.deserializeBinaryFromReader = function(msg, reader) {
       msg.setVersion(value);
       break;
     case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDescription(value);
+      break;
+    case 4:
       var value = new proto.scarab.ProfileArg;
       reader.readMessage(value,proto.scarab.ProfileArg.deserializeBinaryFromReader);
       msg.addArgs(value);
@@ -928,10 +986,17 @@ proto.scarab.ProfileSpec.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getDescription();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
   f = message.getArgsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      3,
+      4,
       f,
       proto.scarab.ProfileArg.serializeBinaryToWriter
     );
@@ -976,12 +1041,30 @@ proto.scarab.ProfileSpec.prototype.setVersion = function(value) {
 
 
 /**
- * repeated ProfileArg args = 3;
+ * optional string description = 3;
+ * @return {string}
+ */
+proto.scarab.ProfileSpec.prototype.getDescription = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.scarab.ProfileSpec} returns this
+ */
+proto.scarab.ProfileSpec.prototype.setDescription = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * repeated ProfileArg args = 4;
  * @return {!Array<!proto.scarab.ProfileArg>}
  */
 proto.scarab.ProfileSpec.prototype.getArgsList = function() {
   return /** @type{!Array<!proto.scarab.ProfileArg>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.scarab.ProfileArg, 3));
+    jspb.Message.getRepeatedWrapperField(this, proto.scarab.ProfileArg, 4));
 };
 
 
@@ -990,7 +1073,7 @@ proto.scarab.ProfileSpec.prototype.getArgsList = function() {
  * @return {!proto.scarab.ProfileSpec} returns this
 */
 proto.scarab.ProfileSpec.prototype.setArgsList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 3, value);
+  return jspb.Message.setRepeatedWrapperField(this, 4, value);
 };
 
 
@@ -1000,7 +1083,7 @@ proto.scarab.ProfileSpec.prototype.setArgsList = function(value) {
  * @return {!proto.scarab.ProfileArg}
  */
 proto.scarab.ProfileSpec.prototype.addArgs = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.scarab.ProfileArg, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.scarab.ProfileArg, opt_index);
 };
 
 
