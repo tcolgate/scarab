@@ -21,6 +21,7 @@ func getFileSystem() http.FileSystem {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	return http.FS(fsys)
 }
 
@@ -37,6 +38,26 @@ func UIServer(addr string, uiSrvr pb.ManagerUIServer) {
 	mux := http.NewServeMux()
 	// Serve static files
 	mux.Handle("/", fs)
+	mux.HandleFunc("/jobs", func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = "/"
+		fs.ServeHTTP(w, r)
+	})
+	mux.HandleFunc("/jobs/", func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = "/"
+		fs.ServeHTTP(w, r)
+	})
+	mux.HandleFunc("/profiles", func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = "/"
+		fs.ServeHTTP(w, r)
+	})
+	mux.HandleFunc("/archive", func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = "/"
+		fs.ServeHTTP(w, r)
+	})
+	mux.HandleFunc("/archive/", func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = "/"
+		fs.ServeHTTP(w, r)
+	})
 
 	h := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if wrappedGrpc.IsGrpcWebRequest(req) {
