@@ -287,7 +287,7 @@ proto.scarab.ListProfilesResponse.prototype.toObject = function(opt_includeInsta
 proto.scarab.ListProfilesResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     registeredList: jspb.Message.toObjectList(msg.getRegisteredList(),
-    scarab$common_pb.RegiteredProfile.toObject, includeInstance)
+    scarab$common_pb.RegisteredProfile.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -325,8 +325,8 @@ proto.scarab.ListProfilesResponse.deserializeBinaryFromReader = function(msg, re
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new scarab$common_pb.RegiteredProfile;
-      reader.readMessage(value,scarab$common_pb.RegiteredProfile.deserializeBinaryFromReader);
+      var value = new scarab$common_pb.RegisteredProfile;
+      reader.readMessage(value,scarab$common_pb.RegisteredProfile.deserializeBinaryFromReader);
       msg.addRegistered(value);
       break;
     default:
@@ -363,24 +363,24 @@ proto.scarab.ListProfilesResponse.serializeBinaryToWriter = function(message, wr
     writer.writeRepeatedMessage(
       1,
       f,
-      scarab$common_pb.RegiteredProfile.serializeBinaryToWriter
+      scarab$common_pb.RegisteredProfile.serializeBinaryToWriter
     );
   }
 };
 
 
 /**
- * repeated RegiteredProfile registered = 1;
- * @return {!Array<!proto.scarab.RegiteredProfile>}
+ * repeated RegisteredProfile registered = 1;
+ * @return {!Array<!proto.scarab.RegisteredProfile>}
  */
 proto.scarab.ListProfilesResponse.prototype.getRegisteredList = function() {
-  return /** @type{!Array<!proto.scarab.RegiteredProfile>} */ (
-    jspb.Message.getRepeatedWrapperField(this, scarab$common_pb.RegiteredProfile, 1));
+  return /** @type{!Array<!proto.scarab.RegisteredProfile>} */ (
+    jspb.Message.getRepeatedWrapperField(this, scarab$common_pb.RegisteredProfile, 1));
 };
 
 
 /**
- * @param {!Array<!proto.scarab.RegiteredProfile>} value
+ * @param {!Array<!proto.scarab.RegisteredProfile>} value
  * @return {!proto.scarab.ListProfilesResponse} returns this
 */
 proto.scarab.ListProfilesResponse.prototype.setRegisteredList = function(value) {
@@ -389,12 +389,12 @@ proto.scarab.ListProfilesResponse.prototype.setRegisteredList = function(value) 
 
 
 /**
- * @param {!proto.scarab.RegiteredProfile=} opt_value
+ * @param {!proto.scarab.RegisteredProfile=} opt_value
  * @param {number=} opt_index
- * @return {!proto.scarab.RegiteredProfile}
+ * @return {!proto.scarab.RegisteredProfile}
  */
 proto.scarab.ListProfilesResponse.prototype.addRegistered = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.scarab.RegiteredProfile, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.scarab.RegisteredProfile, opt_index);
 };
 
 

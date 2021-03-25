@@ -22,9 +22,9 @@ export namespace ListProfilesRequest {
 
 export class ListProfilesResponse extends jspb.Message {
   clearRegisteredList(): void;
-  getRegisteredList(): Array<scarab_common_pb.RegiteredProfile>;
-  setRegisteredList(value: Array<scarab_common_pb.RegiteredProfile>): void;
-  addRegistered(value?: scarab_common_pb.RegiteredProfile, index?: number): scarab_common_pb.RegiteredProfile;
+  getRegisteredList(): Array<scarab_common_pb.RegisteredProfile>;
+  setRegisteredList(value: Array<scarab_common_pb.RegisteredProfile>): void;
+  addRegistered(value?: scarab_common_pb.RegisteredProfile, index?: number): scarab_common_pb.RegisteredProfile;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListProfilesResponse.AsObject;
@@ -38,7 +38,7 @@ export class ListProfilesResponse extends jspb.Message {
 
 export namespace ListProfilesResponse {
   export type AsObject = {
-    registeredList: Array<scarab_common_pb.RegiteredProfile.AsObject>,
+    registeredList: Array<scarab_common_pb.RegisteredProfile.AsObject>,
   }
 }
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/oklog/ulid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/tcolgate/scarab/pb"
 )
@@ -203,9 +204,10 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			log.Printf("loop list")
 			resp := &pb.ListProfilesResponse{}
 			for _, e := range entries {
-				rprof := &pb.RegiteredProfile{}
+				rprof := &pb.RegisteredProfile{}
 				rprof.Spec = e.Spec
 				rprof.Workers = e.GetActiveWorkers()
+				rprof.FirstRegistration = timestamppb.New(e.FirstRegistration)
 				resp.Registered = append(resp.Registered, rprof)
 			}
 			req.resp <- resp

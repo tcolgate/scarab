@@ -18,8 +18,10 @@
     "@types/react-router-dom": "^5.1.7",
     "google-protobuf": "^3.14.0",
     "grpc-web": "~1.2.1",
+    "moment": "^2.29.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-moment": "^1.1.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
     "ts-protoc-gen": "^0.14.0",
@@ -41,6 +43,8 @@
     "extends": [
       "react-app"
     ],
-    "ignorePatterns": ["**/*_pb*.js"]
+    "ignorePatterns": [
+      "**/*_pb*.js"
+    ]
   }
 }

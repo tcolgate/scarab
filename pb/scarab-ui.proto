@@ -13,7 +13,7 @@ message ListProfilesRequest {
 
 
 message ListProfilesResponse {
-  repeated scarab.RegiteredProfile registered = 1;
+  repeated scarab.RegisteredProfile registered = 1;
 }
 
 message WatchActiveJobsRequest {

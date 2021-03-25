@@ -12,7 +12,7 @@ message WorkerDetails {
   string name = 2;
 }
 
-message RegiteredProfile {
+message RegisteredProfile {
   ProfileSpec               spec              = 1;
   google.protobuf.Timestamp firstRegistration = 2;
   repeated WorkerDetails    workers           = 3;

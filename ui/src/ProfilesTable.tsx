@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container } from '@material-ui/core';
@@ -16,17 +16,15 @@ import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 
+import Moment from 'react-moment';
+
 import {grpc} from "@improbable-eng/grpc-web";
 import { ManagerUI } from './scarab-ui_pb_service';
 import { ListProfilesRequest, ListProfilesResponse } from './scarab-ui_pb';
-import { StartJobRequest, StartJobResponse } from './scarab-common_pb';
+import { RegisteredProfile } from './scarab-common_pb';
 import { ManagerUIClient } from './scarab-ui_pb_service';
 
 const host = "http://localhost:8081";
-
-function listProfiles() {
-}
-
 
 const useRowStyles = makeStyles({
     root: {
@@ -36,24 +34,16 @@ const useRowStyles = makeStyles({
           },
 });
 
-function createData(name :string, calories :number, fat :number, carbs :number, protein :number, price :number) {
-    return {
-          name,
-          calories,
-          fat,
-          carbs,
-          protein,
-          price,
-          history: [
-                  { date: '2020-01-05', customerId: '11091700', amount: 3 },
-                  { date: '2020-01-02', customerId: 'Anonymous', amount: 1 },
-                ],
-        };
-}
+type RowProps = {
+  profile: RegisteredProfile
+};
 
-function Row(props :any) {
-    const { row } = props;
+function Row(props: RowProps){
     const [open, setOpen] = React.useState(false);
+    const {profile} = props
+    const spec = profile.getSpec()
+    const firstReg = profile.getFirstregistration()
+    const workers = profile.getWorkersList()
     const classes = useRowStyles();
 
     return (
@@ -65,131 +55,74 @@ function Row(props :any) {
                 </IconButton>
               </TableCell>
               <TableCell component="th" scope="row">
-                {row.name}
+                {spec?.getProfile() ?? "unknown"}
               </TableCell>
-              <TableCell align="right">{row.calories}</TableCell>
-              <TableCell align="right">{row.fat}</TableCell>
-              <TableCell align="right">{row.carbs}</TableCell>
-              <TableCell align="right">{row.protein}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                <Collapse in={open} timeout="auto" unmountOnExit>
-                  <Box margin={1}>
-                    <Typography variant="h6" gutterBottom component="div">
-                      History
-                    </Typography>
-                    <Table size="small" aria-label="purchases">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Date</TableCell>
-                          <TableCell>Customer</TableCell>
-                          <TableCell align="right">Amount</TableCell>
-                          <TableCell align="right">Total price ($)</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {row.history.map((historyRow :any) => (
-                                              <TableRow key={historyRow.date}>
-                                                <TableCell component="th" scope="row">
-                                                  {historyRow.date}
-                                                </TableCell>
-                                                <TableCell>{historyRow.customerId}</TableCell>
-                                                <TableCell align="right">{historyRow.amount}</TableCell>
-                                                <TableCell align="right">
-                                                  {Math.round(historyRow.amount * row.price * 100) / 100}
-                                                </TableCell>
-                                              </TableRow>
-                                            ))}
-                      </TableBody>
-                    </Table>
-                  </Box>
-                </Collapse>
+              <TableCell component="th" scope="row">
+                {spec?.getVersion() ?? "unknown"}
+              </TableCell>
+              <TableCell component="th" scope="row">
+                <Moment>{firstReg.toDate()}</Moment>
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {workers?.length ?? 0}
               </TableCell>
             </TableRow>
           </React.Fragment>
         );
 }
 
-Row.propTypes = {
-    row: PropTypes.shape({
-          calories: PropTypes.number.isRequired,
-          carbs: PropTypes.number.isRequired,
-          fat: PropTypes.number.isRequired,
-          history: PropTypes.arrayOf(
-                  PropTypes.shape({
-                            amount: PropTypes.number.isRequired,
-                            customerId: PropTypes.string.isRequired,
-                            date: PropTypes.string.isRequired,
-                          }),
-                ).isRequired,
-          name: PropTypes.string.isRequired,
-          price: PropTypes.number.isRequired,
-          protein: PropTypes.number.isRequired,
-        }).isRequired,
-};
-
-const rows = [
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0, 3.99),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3, 4.99),
-    createData('Eclair', 262, 16.0, 24, 6.0, 3.79),
-    createData('Cupcake', 305, 3.7, 67, 4.3, 2.5),
-    createData('Gingerbread', 356, 16.0, 49, 3.9, 1.5),
-];
-
 type PTProps = {};
 
 type PTState = {
-    profiles: any,
+    profiles: RegisteredProfile[],
     error: boolean
 };
 
-class ProfilesTable extends Component<PTProps, PTState>{
-  constructor(props: PTProps) {
-    super(props);
-    this.state = {
-      profiles: new ListProfilesResponse(),
-      error: false
-    };
-  };
-  fetch = () => {
+const ProfilesTable: React.FC<PTProps> = (props: PTProps) => {
+  const [state, setState] = useState<PTState>({
+      profiles: [],
+      error: false,
+  })
+
+  useEffect(() => {
     const req = new ListProfilesRequest();
     const client = new ManagerUIClient(host);
     client.listProfiles(req, (err, lpResp) => {
-      console.log(err)
-      console.log(lpResp)
-      this.setState({
-        profiles: lpResp,
-      })
+      if (lpResp != null) {
+        setState({
+          profiles: lpResp.getRegisteredList(),
+          error: false
+        })
+      }
     });
-  };
+  },[])
+  /*
+          {state.profiles.map((row :RegisteredProfile) => (Row(row)))}
+          */
 
-  componentDidMount() {
-    this.fetch();
-  };
-
-  render() {
-    return (
-      <Container>
-        <TableContainer component={Paper}>
-          <Table aria-label="collapsible table">
-            <TableHead>
-              <TableRow>
-                <TableCell />
-                <TableCell>Name</TableCell>
-                <TableCell align="right">Version</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => (
-                            <Row key={row.name} row={row} />
-                          ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Container>
-    );
-  }
+  return (
+    <TableContainer component={Paper}>
+      <Table aria-label="collapsible table">
+        <TableHead>
+          <TableRow>
+            <TableCell />
+            <TableCell>Name</TableCell>
+            <TableCell>Version</TableCell>
+            <TableCell>FirstRegistration</TableCell>
+            <TableCell>Workers</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {state.profiles.map((row :RegisteredProfile) => {
+            return (
+              <Row profile={row} />
+            )
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
 }
+
 
 export default ProfilesTable;

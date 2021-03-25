@@ -28,7 +28,7 @@ export namespace WorkerDetails {
   }
 }
 
-export class RegiteredProfile extends jspb.Message {
+export class RegisteredProfile extends jspb.Message {
   hasSpec(): boolean;
   clearSpec(): void;
   getSpec(): ProfileSpec | undefined;
@@ -45,16 +45,16 @@ export class RegiteredProfile extends jspb.Message {
   addWorkers(value?: WorkerDetails, index?: number): WorkerDetails;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): RegiteredProfile.AsObject;
-  static toObject(includeInstance: boolean, msg: RegiteredProfile): RegiteredProfile.AsObject;
+  toObject(includeInstance?: boolean): RegisteredProfile.AsObject;
+  static toObject(includeInstance: boolean, msg: RegisteredProfile): RegisteredProfile.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: RegiteredProfile, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): RegiteredProfile;
-  static deserializeBinaryFromReader(message: RegiteredProfile, reader: jspb.BinaryReader): RegiteredProfile;
+  static serializeBinaryToWriter(message: RegisteredProfile, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): RegisteredProfile;
+  static deserializeBinaryFromReader(message: RegisteredProfile, reader: jspb.BinaryReader): RegisteredProfile;
 }
 
-export namespace RegiteredProfile {
+export namespace RegisteredProfile {
   export type AsObject = {
     spec?: ProfileSpec.AsObject,
     firstregistration?: google_protobuf_timestamp_pb.Timestamp.AsObject,
