@@ -32,6 +32,15 @@ type ManagerUIListProfiles = {
   readonly responseType: typeof scarab_ui_pb.ListProfilesResponse;
 };
 
+type ManagerUIListJobs = {
+  readonly methodName: string;
+  readonly service: typeof ManagerUI;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof scarab_ui_pb.ListJobsRequest;
+  readonly responseType: typeof scarab_ui_pb.ListJobsResponse;
+};
+
 type ManagerUIWatchActiveJobs = {
   readonly methodName: string;
   readonly service: typeof ManagerUI;
@@ -46,6 +55,7 @@ export class ManagerUI {
   static readonly StartJob: ManagerUIStartJob;
   static readonly StopJob: ManagerUIStopJob;
   static readonly ListProfiles: ManagerUIListProfiles;
+  static readonly ListJobs: ManagerUIListJobs;
   static readonly WatchActiveJobs: ManagerUIWatchActiveJobs;
 }
 
@@ -107,6 +117,15 @@ export class ManagerUIClient {
   listProfiles(
     requestMessage: scarab_ui_pb.ListProfilesRequest,
     callback: (error: ServiceError|null, responseMessage: scarab_ui_pb.ListProfilesResponse|null) => void
+  ): UnaryResponse;
+  listJobs(
+    requestMessage: scarab_ui_pb.ListJobsRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: scarab_ui_pb.ListJobsResponse|null) => void
+  ): UnaryResponse;
+  listJobs(
+    requestMessage: scarab_ui_pb.ListJobsRequest,
+    callback: (error: ServiceError|null, responseMessage: scarab_ui_pb.ListJobsResponse|null) => void
   ): UnaryResponse;
   watchActiveJobs(requestMessage: scarab_ui_pb.WatchActiveJobsRequest, metadata?: grpc.Metadata): ResponseStream<scarab_ui_pb.WatchActiveJobsResponse>;
 }

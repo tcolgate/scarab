@@ -608,6 +608,85 @@ func (x *StartJobResponse) GetId() string {
 	return ""
 }
 
+type Job struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id      string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Profile string           `protobuf:"bytes,2,opt,name=profile,proto3" json:"profile,omitempty"`
+	Version string           `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	Args    []*JobArg        `protobuf:"bytes,4,rep,name=args,proto3" json:"args,omitempty"`
+	Workers []*WorkerDetails `protobuf:"bytes,5,rep,name=workers,proto3" json:"workers,omitempty"`
+}
+
+func (x *Job) Reset() {
+	*x = Job{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_scarab_common_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Job) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Job) ProtoMessage() {}
+
+func (x *Job) ProtoReflect() protoreflect.Message {
+	mi := &file_scarab_common_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Job.ProtoReflect.Descriptor instead.
+func (*Job) Descriptor() ([]byte, []int) {
+	return file_scarab_common_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *Job) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Job) GetProfile() string {
+	if x != nil {
+		return x.Profile
+	}
+	return ""
+}
+
+func (x *Job) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *Job) GetArgs() []*JobArg {
+	if x != nil {
+		return x.Args
+	}
+	return nil
+}
+
+func (x *Job) GetWorkers() []*WorkerDetails {
+	if x != nil {
+		return x.Workers
+	}
+	return nil
+}
+
 var File_scarab_common_proto protoreflect.FileDescriptor
 
 var file_scarab_common_proto_rawDesc = []byte{
@@ -672,10 +751,20 @@ var file_scarab_common_proto_rawDesc = []byte{
 	0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x73, 0x63, 0x61, 0x72, 0x61, 0x62, 0x2e, 0x4a,
 	0x6f, 0x62, 0x41, 0x72, 0x67, 0x52, 0x04, 0x61, 0x72, 0x67, 0x73, 0x22, 0x22, 0x0a, 0x10, 0x53,
 	0x74, 0x61, 0x72, 0x74, 0x4a, 0x6f, 0x62, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x42,
-	0x23, 0x5a, 0x21, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x63,
-	0x6f, 0x6c, 0x67, 0x61, 0x74, 0x65, 0x2f, 0x73, 0x63, 0x61, 0x72, 0x61, 0x62, 0x2f, 0x73, 0x63,
-	0x61, 0x72, 0x61, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22,
+	0x9e, 0x01, 0x0a, 0x03, 0x4a, 0x6f, 0x62, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69,
+	0x6c, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c,
+	0x65, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x04, 0x61,
+	0x72, 0x67, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x73, 0x63, 0x61, 0x72,
+	0x61, 0x62, 0x2e, 0x4a, 0x6f, 0x62, 0x41, 0x72, 0x67, 0x52, 0x04, 0x61, 0x72, 0x67, 0x73, 0x12,
+	0x2f, 0x0a, 0x07, 0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x15, 0x2e, 0x73, 0x63, 0x61, 0x72, 0x61, 0x62, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72,
+	0x44, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x73, 0x52, 0x07, 0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x73,
+	0x42, 0x23, 0x5a, 0x21, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74,
+	0x63, 0x6f, 0x6c, 0x67, 0x61, 0x74, 0x65, 0x2f, 0x73, 0x63, 0x61, 0x72, 0x61, 0x62, 0x2f, 0x73,
+	0x63, 0x61, 0x72, 0x61, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -690,7 +779,7 @@ func file_scarab_common_proto_rawDescGZIP() []byte {
 	return file_scarab_common_proto_rawDescData
 }
 
-var file_scarab_common_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_scarab_common_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_scarab_common_proto_goTypes = []interface{}{
 	(*WorkerDetails)(nil),       // 0: scarab.WorkerDetails
 	(*RegisteredProfile)(nil),   // 1: scarab.RegisteredProfile
@@ -701,22 +790,25 @@ var file_scarab_common_proto_goTypes = []interface{}{
 	(*JobArg)(nil),              // 6: scarab.JobArg
 	(*StartJobRequest)(nil),     // 7: scarab.StartJobRequest
 	(*StartJobResponse)(nil),    // 8: scarab.StartJobResponse
-	(*timestamp.Timestamp)(nil), // 9: google.protobuf.Timestamp
+	(*Job)(nil),                 // 9: scarab.Job
+	(*timestamp.Timestamp)(nil), // 10: google.protobuf.Timestamp
 }
 var file_scarab_common_proto_depIdxs = []int32{
-	3, // 0: scarab.RegisteredProfile.spec:type_name -> scarab.ProfileSpec
-	9, // 1: scarab.RegisteredProfile.firstRegistration:type_name -> google.protobuf.Timestamp
-	0, // 2: scarab.RegisteredProfile.workers:type_name -> scarab.WorkerDetails
-	5, // 3: scarab.ProfileArg.default:type_name -> scarab.JobArgValue
-	2, // 4: scarab.ProfileSpec.args:type_name -> scarab.ProfileArg
-	4, // 5: scarab.JobArgValue.option:type_name -> scarab.JobArgOption
-	5, // 6: scarab.JobArg.value:type_name -> scarab.JobArgValue
-	6, // 7: scarab.StartJobRequest.args:type_name -> scarab.JobArg
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	3,  // 0: scarab.RegisteredProfile.spec:type_name -> scarab.ProfileSpec
+	10, // 1: scarab.RegisteredProfile.firstRegistration:type_name -> google.protobuf.Timestamp
+	0,  // 2: scarab.RegisteredProfile.workers:type_name -> scarab.WorkerDetails
+	5,  // 3: scarab.ProfileArg.default:type_name -> scarab.JobArgValue
+	2,  // 4: scarab.ProfileSpec.args:type_name -> scarab.ProfileArg
+	4,  // 5: scarab.JobArgValue.option:type_name -> scarab.JobArgOption
+	5,  // 6: scarab.JobArg.value:type_name -> scarab.JobArgValue
+	6,  // 7: scarab.StartJobRequest.args:type_name -> scarab.JobArg
+	6,  // 8: scarab.Job.args:type_name -> scarab.JobArg
+	0,  // 9: scarab.Job.workers:type_name -> scarab.WorkerDetails
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_scarab_common_proto_init() }
@@ -833,6 +925,18 @@ func file_scarab_common_proto_init() {
 				return nil
 			}
 		}
+		file_scarab_common_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Job); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_scarab_common_proto_msgTypes[5].OneofWrappers = []interface{}{
 		(*JobArgValue_String_)(nil),
@@ -846,7 +950,7 @@ func file_scarab_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_scarab_common_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

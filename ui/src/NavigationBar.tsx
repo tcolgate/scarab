@@ -80,6 +80,9 @@ const NavigationBar: React.FC = (props: any) => {
         >
           <MenuList>
             {Routes.map((prop, key) => {
+              if (prop.sidebarName === ""){
+                return 
+              }
               return (
                 <NavLink to={prop.path} style={{ textDecoration: 'none' }} key={key}>
                   <MenuItem selected={activeRoute(prop.path)}>

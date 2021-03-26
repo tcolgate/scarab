@@ -20,9 +20,10 @@ import Moment from 'react-moment';
 
 import {grpc} from "@improbable-eng/grpc-web";
 import { ManagerUI } from './scarab-ui_pb_service';
-import { ListProfilesRequest, ListProfilesResponse } from './scarab-ui_pb';
-import { RegisteredProfile } from './scarab-common_pb';
+import { ListJobsRequest, ListJobsResponse } from './scarab-ui_pb';
+import { Job } from './scarab-common_pb';
 import { ManagerUIClient } from './scarab-ui_pb_service';
+import JobCreateDialog from './JobCreateDialog';
 
 const host = "http://localhost:8081";
 
@@ -35,15 +36,13 @@ const useRowStyles = makeStyles({
 });
 
 type RowProps = {
-  profile: RegisteredProfile
+  job: Job
 };
 
 function Row(props: RowProps){
     const [open, setOpen] = React.useState(false);
-    const {profile} = props
-    const spec = profile.getSpec()
-    const firstReg = profile.getFirstregistration()
-    const workers = profile.getWorkersList()
+    const {job} = props
+    const workers = job.getWorkersList()
     const classes = useRowStyles();
 
     return (
@@ -55,13 +54,13 @@ function Row(props: RowProps){
                 </IconButton>
               </TableCell>
               <TableCell component="th" scope="row">
-                {spec?.getProfile() ?? "unknown"}
+                {job?.getProfile() ?? "unknown"}
               </TableCell>
               <TableCell component="th" scope="row">
-                {spec?.getVersion() ?? "unknown"}
+                {job?.getVersion() ?? "unknown"}
               </TableCell>
               <TableCell component="th" scope="row">
-                <Moment>{firstReg.toDate()}</Moment>
+                Sometime
               </TableCell>
               <TableCell component="th" scope="row">
                 {workers?.length ?? 0}
@@ -71,26 +70,26 @@ function Row(props: RowProps){
         );
 }
 
-type PTProps = {};
+type JTProps = {};
 
-type PTState = {
-    profiles: RegisteredProfile[],
+type JTState = {
+    jobs: Job[],
     error: boolean
 };
 
-const ProfilesTable: React.FC<PTProps> = (props: PTProps) => {
-  const [state, setState] = useState<PTState>({
-      profiles: [],
+function JobsTable(props: JTProps){
+  const [state, setState] = useState<JTState>({
+      jobs: [],
       error: false,
   })
 
   useEffect(() => {
-    const req = new ListProfilesRequest();
+    const req = new ListJobsRequest();
     const client = new ManagerUIClient(host);
-    client.listProfiles(req, (err, lpResp) => {
-      if (lpResp != null) {
+    client.listJobs(req, (err, resp) => {
+      if (resp != null) {
         setState({
-          profiles: lpResp.getRegisteredList(),
+          jobs: resp.getJobsList(),
           error: false
         })
       }
@@ -110,9 +109,9 @@ const ProfilesTable: React.FC<PTProps> = (props: PTProps) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {state.profiles.map((row :RegisteredProfile) => {
+          {state.jobs.map((row :Job) => {
             return (
-              <Row profile={row} />
+              <Row job={row} />
             )
           })}
         </TableBody>
@@ -122,4 +121,19 @@ const ProfilesTable: React.FC<PTProps> = (props: PTProps) => {
 }
 
 
-export default ProfilesTable;
+type Props = {};
+
+type State = {
+  dialog: boolean
+};
+
+const JobsPage: React.FC<Props> = (props: Props) => {
+  return (
+    <div>
+      <JobsTable />
+      <JobCreateDialog />
+    </div>
+  );
+}
+
+export default JobsPage;

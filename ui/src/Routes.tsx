@@ -1,15 +1,20 @@
 import React from 'react';
 import ProfilesTable from './ProfilesTable';
-import Fab from '@material-ui/core/Fab';
-import AddIcon from '@material-ui/icons/Add';
+import JobsPage from './JobsPage';
 
 const Jobs: React.FC = () => {
     return (
           <div>
           <h1>Jobs</h1>
-            <Fab color="primary" aria-label="add">
-              <AddIcon />
-            </Fab>
+          <JobsPage />
+          </div>
+        );
+};
+
+const Job: React.FC = () => {
+    return (
+          <div>
+          <h1>Job</h1>
           </div>
         );
 };
@@ -34,6 +39,10 @@ const Routes = [
       path: '/',
       sidebarName: 'Jobs',
       component: Jobs
+    },
+    {
+      path: '/job/:profile/:version/:id',
+      component: Job
     },
     {
       path: '/profiles',

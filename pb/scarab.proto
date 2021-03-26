@@ -10,7 +10,6 @@ import 'metrics.proto'; // import prom metrics definitions
 import 'scarab-common.proto'; // import prom metrics definitions
 
 service Manager {
-  rpc RunProfile (StartJobRequest) returns (StartJobResponse) {};
   rpc RegisterProfile (RegisterProfileRequest) returns (stream KeepAlive) {};
 }
 

@@ -277,3 +277,43 @@ export namespace StartJobResponse {
   }
 }
 
+export class Job extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
+  getProfile(): string;
+  setProfile(value: string): void;
+
+  getVersion(): string;
+  setVersion(value: string): void;
+
+  clearArgsList(): void;
+  getArgsList(): Array<JobArg>;
+  setArgsList(value: Array<JobArg>): void;
+  addArgs(value?: JobArg, index?: number): JobArg;
+
+  clearWorkersList(): void;
+  getWorkersList(): Array<WorkerDetails>;
+  setWorkersList(value: Array<WorkerDetails>): void;
+  addWorkers(value?: WorkerDetails, index?: number): WorkerDetails;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Job.AsObject;
+  static toObject(includeInstance: boolean, msg: Job): Job.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: Job, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Job;
+  static deserializeBinaryFromReader(message: Job, reader: jspb.BinaryReader): Job;
+}
+
+export namespace Job {
+  export type AsObject = {
+    id: string,
+    profile: string,
+    version: string,
+    argsList: Array<JobArg.AsObject>,
+    workersList: Array<WorkerDetails.AsObject>,
+  }
+}
+

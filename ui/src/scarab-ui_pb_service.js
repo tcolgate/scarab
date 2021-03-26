@@ -38,6 +38,15 @@ ManagerUI.ListProfiles = {
   responseType: scarab_ui_pb.ListProfilesResponse
 };
 
+ManagerUI.ListJobs = {
+  methodName: "ListJobs",
+  service: ManagerUI,
+  requestStream: false,
+  responseStream: false,
+  requestType: scarab_ui_pb.ListJobsRequest,
+  responseType: scarab_ui_pb.ListJobsResponse
+};
+
 ManagerUI.WatchActiveJobs = {
   methodName: "WatchActiveJobs",
   service: ManagerUI,
@@ -121,6 +130,37 @@ ManagerUIClient.prototype.listProfiles = function listProfiles(requestMessage, m
     callback = arguments[1];
   }
   var client = grpc.unary(ManagerUI.ListProfiles, {
+    request: requestMessage,
+    host: this.serviceHost,
+    metadata: metadata,
+    transport: this.options.transport,
+    debug: this.options.debug,
+    onEnd: function (response) {
+      if (callback) {
+        if (response.status !== grpc.Code.OK) {
+          var err = new Error(response.statusMessage);
+          err.code = response.status;
+          err.metadata = response.trailers;
+          callback(err, null);
+        } else {
+          callback(null, response.message);
+        }
+      }
+    }
+  });
+  return {
+    cancel: function () {
+      callback = null;
+      client.close();
+    }
+  };
+};
+
+ManagerUIClient.prototype.listJobs = function listJobs(requestMessage, metadata, callback) {
+  if (arguments.length === 2) {
+    callback = arguments[1];
+  }
+  var client = grpc.unary(ManagerUI.ListJobs, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,

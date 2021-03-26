@@ -4,6 +4,44 @@
 import * as jspb from "google-protobuf";
 import * as scarab_common_pb from "./scarab-common_pb";
 
+export class ListJobsRequest extends jspb.Message {
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListJobsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListJobsRequest): ListJobsRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ListJobsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListJobsRequest;
+  static deserializeBinaryFromReader(message: ListJobsRequest, reader: jspb.BinaryReader): ListJobsRequest;
+}
+
+export namespace ListJobsRequest {
+  export type AsObject = {
+  }
+}
+
+export class ListJobsResponse extends jspb.Message {
+  clearJobsList(): void;
+  getJobsList(): Array<scarab_common_pb.Job>;
+  setJobsList(value: Array<scarab_common_pb.Job>): void;
+  addJobs(value?: scarab_common_pb.Job, index?: number): scarab_common_pb.Job;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListJobsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListJobsResponse): ListJobsResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ListJobsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListJobsResponse;
+  static deserializeBinaryFromReader(message: ListJobsResponse, reader: jspb.BinaryReader): ListJobsResponse;
+}
+
+export namespace ListJobsResponse {
+  export type AsObject = {
+    jobsList: Array<scarab_common_pb.Job.AsObject>,
+  }
+}
+
 export class ListProfilesRequest extends jspb.Message {
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListProfilesRequest.AsObject;

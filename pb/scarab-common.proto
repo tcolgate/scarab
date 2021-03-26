@@ -60,4 +60,13 @@ message StartJobResponse {
   string  id = 1;
 }
 
+message Job {
+  string                 id      = 1;
+  string                 profile = 2;
+  string                 version = 3;
+  repeated JobArg        args    = 4;
+  repeated WorkerDetails workers = 5;
+}
+
+
 

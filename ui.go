@@ -42,7 +42,7 @@ func UIServer(addr string, uiSrvr pb.ManagerUIServer) {
 		r.URL.Path = "/"
 		fs.ServeHTTP(w, r)
 	})
-	mux.HandleFunc("/jobs/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/job/", func(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = "/"
 		fs.ServeHTTP(w, r)
 	})

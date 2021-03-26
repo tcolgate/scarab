@@ -21,6 +21,7 @@ type ManagerUIClient interface {
 	StartJob(ctx context.Context, in *StartJobRequest, opts ...grpc.CallOption) (*StartJobResponse, error)
 	StopJob(ctx context.Context, in *StopJobRequest, opts ...grpc.CallOption) (*StopJobResponse, error)
 	ListProfiles(ctx context.Context, in *ListProfilesRequest, opts ...grpc.CallOption) (*ListProfilesResponse, error)
+	ListJobs(ctx context.Context, in *ListJobsRequest, opts ...grpc.CallOption) (*ListJobsResponse, error)
 	WatchActiveJobs(ctx context.Context, in *WatchActiveJobsRequest, opts ...grpc.CallOption) (ManagerUI_WatchActiveJobsClient, error)
 }
 
@@ -53,6 +54,15 @@ func (c *managerUIClient) StopJob(ctx context.Context, in *StopJobRequest, opts 
 func (c *managerUIClient) ListProfiles(ctx context.Context, in *ListProfilesRequest, opts ...grpc.CallOption) (*ListProfilesResponse, error) {
 	out := new(ListProfilesResponse)
 	err := c.cc.Invoke(ctx, "/scarab.ManagerUI/ListProfiles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerUIClient) ListJobs(ctx context.Context, in *ListJobsRequest, opts ...grpc.CallOption) (*ListJobsResponse, error) {
+	out := new(ListJobsResponse)
+	err := c.cc.Invoke(ctx, "/scarab.ManagerUI/ListJobs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +108,7 @@ type ManagerUIServer interface {
 	StartJob(context.Context, *StartJobRequest) (*StartJobResponse, error)
 	StopJob(context.Context, *StopJobRequest) (*StopJobResponse, error)
 	ListProfiles(context.Context, *ListProfilesRequest) (*ListProfilesResponse, error)
+	ListJobs(context.Context, *ListJobsRequest) (*ListJobsResponse, error)
 	WatchActiveJobs(*WatchActiveJobsRequest, ManagerUI_WatchActiveJobsServer) error
 	mustEmbedUnimplementedManagerUIServer()
 }
@@ -114,6 +125,9 @@ func (UnimplementedManagerUIServer) StopJob(context.Context, *StopJobRequest) (*
 }
 func (UnimplementedManagerUIServer) ListProfiles(context.Context, *ListProfilesRequest) (*ListProfilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProfiles not implemented")
+}
+func (UnimplementedManagerUIServer) ListJobs(context.Context, *ListJobsRequest) (*ListJobsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListJobs not implemented")
 }
 func (UnimplementedManagerUIServer) WatchActiveJobs(*WatchActiveJobsRequest, ManagerUI_WatchActiveJobsServer) error {
 	return status.Errorf(codes.Unimplemented, "method WatchActiveJobs not implemented")
@@ -185,6 +199,24 @@ func _ManagerUI_ListProfiles_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ManagerUI_ListJobs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListJobsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerUIServer).ListJobs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarab.ManagerUI/ListJobs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerUIServer).ListJobs(ctx, req.(*ListJobsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ManagerUI_WatchActiveJobs_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(WatchActiveJobsRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -224,6 +256,10 @@ var ManagerUI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListProfiles",
 			Handler:    _ManagerUI_ListProfiles_Handler,
+		},
+		{
+			MethodName: "ListJobs",
+			Handler:    _ManagerUI_ListJobs_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

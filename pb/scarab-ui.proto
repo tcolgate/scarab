@@ -8,9 +8,15 @@ package scarab;
 
 import 'scarab-common.proto'; // import scarab job arg definitions
 
-message ListProfilesRequest {
+message ListJobsRequest {
 }
 
+message ListJobsResponse {
+  repeated scarab.Job jobs = 1;
+}
+
+message ListProfilesRequest {
+}
 
 message ListProfilesResponse {
   repeated scarab.RegisteredProfile registered = 1;
@@ -33,6 +39,7 @@ service ManagerUI {
   rpc StartJob (scarab.StartJobRequest) returns (scarab.StartJobResponse) {};
   rpc StopJob (scarab.StopJobRequest) returns (scarab.StopJobResponse) {};
   rpc ListProfiles (ListProfilesRequest) returns (ListProfilesResponse) {};
+  rpc ListJobs (ListJobsRequest) returns (ListJobsResponse) {};
   rpc WatchActiveJobs (WatchActiveJobsRequest) returns (stream WatchActiveJobsResponse) {};
 }
 
