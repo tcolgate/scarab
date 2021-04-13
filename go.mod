@@ -3,6 +3,7 @@ module github.com/tcolgate/scarab
 go 1.16
 
 require (
+	github.com/alecthomas/kong v0.2.16
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/improbable-eng/grpc-web v0.14.0

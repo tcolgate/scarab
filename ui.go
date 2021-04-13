@@ -68,5 +68,5 @@ func UIServer(addr string, uiSrvr pb.ManagerUIServer) {
 		mux.ServeHTTP(resp, req)
 	})
 
-	http.ListenAndServe(":8081", h)
+	http.ListenAndServe(addr, h)
 }
