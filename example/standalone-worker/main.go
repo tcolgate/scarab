@@ -14,7 +14,7 @@ import (
 func main() {
 	ctx := context.Background()
 	addr := flag.String("addr", ":8083", "address to listen on")
-	serverAddr := flag.String("manager.addr", "localhost:8080", "address of the manager")
+	serverAddr := flag.String("manager.addr", "localhost:8081", "address of the manager")
 	flag.Parse()
 
 	lis, err := net.Listen("tcp", *addr)

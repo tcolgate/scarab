@@ -25,7 +25,7 @@ import { Job } from './scarab-common_pb';
 import { ManagerUIClient } from './scarab-ui_pb_service';
 import JobCreateDialog from './JobCreateDialog';
 
-const host = "http://localhost:8081";
+const host = "http://localhost:8080";
 
 const useRowStyles = makeStyles({
     root: {

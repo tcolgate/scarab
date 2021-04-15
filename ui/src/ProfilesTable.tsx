@@ -24,7 +24,7 @@ import { ListProfilesRequest, ListProfilesResponse } from './scarab-ui_pb';
 import { RegisteredProfile } from './scarab-common_pb';
 import { ManagerUIClient } from './scarab-ui_pb_service';
 
-const host = "http://localhost:8081";
+const host = "http://localhost:8080";
 
 const useRowStyles = makeStyles({
     root: {
