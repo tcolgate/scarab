@@ -28,13 +28,11 @@ func main() {
 	spec := &pb.ProfileSpec{
 		Profile: "my-other-workload",
 		Version: "1",
-		Args: []*pb.ProfileArg{
-			&pb.ProfileArg{
-				Name:        "host",
-				Description: "host to target",
-				Default:     &pb.JobArgValue{Value: &pb.JobArgValue_String_{}},
-			},
-		},
+		Args: []*pb.ProfileArg{{
+			Name:        "host",
+			Description: "host to target",
+			Default:     &pb.JobArgValue{Value: &pb.JobArgValue_String_{}},
+		}},
 	}
 
 	wrk := scarab.Workload{
