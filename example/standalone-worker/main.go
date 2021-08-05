@@ -39,22 +39,24 @@ func setup(r prometheus.Registerer) scarab.Runner {
 }
 
 func main() {
-	wrk := scarab.Workload{
-		Spec: &pb.ProfileSpec{
-			Profile: "my-other-workload",
-			Version: "1",
-			Args: []*pb.ProfileArg{{
-				Name:        "host",
-				Description: "host to target",
-				Default: &pb.JobArgValue{
-					Value: &pb.JobArgValue_String_{
-						String_: "http://localhost:8089",
-					},
-				},
-			}},
-		}}
+	args := []*pb.ProfileArg{{
+		Name:        "host",
+		Description: "host to target",
+		Default: &pb.JobArgValue{
+			Value: &pb.JobArgValue_String_{
+				String_: "http://localhost:8089",
+			},
+		},
+	}}
 
-	err := scarab.RunStandaloneWorker(wrk, scarab.UserFunc(setup))
+	err := scarab.RunStandaloneWorker(
+		"my-other-workload",
+		"1",
+		"",
+		args,
+		scarab.UserFunc(setup),
+	)
+
 	if err != nil {
 		log.Fatalf("failed to create worker: %v", err)
 	}
