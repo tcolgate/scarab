@@ -6,10 +6,25 @@ import (
 	"log"
 	"net"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tcolgate/scarab"
 	pb "github.com/tcolgate/scarab/pb"
 	"google.golang.org/grpc"
 )
+
+func User(ctx context.Context, args []*pb.JobArg) {
+	for {
+		select {
+		case <-ctx.Done():
+		default:
+		}
+		log.Printf("%#v", args)
+	}
+}
+
+func setup(r prometheus.Registerer) scarab.Runner {
+	return scarab.RunnerFunc(User)
+}
 
 func main() {
 	ctx := context.Background()
@@ -39,7 +54,7 @@ func main() {
 		Spec: spec,
 	}
 
-	wrkr, err := scarab.NewWorker(ctx, *addr, *serverAddr, wrk)
+	wrkr, err := scarab.NewWorker(ctx, *addr, *serverAddr, wrk, scarab.UserFunc(setup))
 	if err != nil {
 		log.Fatalf("failed to create worker: %v", err)
 	}
@@ -48,5 +63,4 @@ func main() {
 
 	err = grpcServer.Serve(lis)
 	log.Printf("listen err, %v", err)
-
 }

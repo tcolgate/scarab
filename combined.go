@@ -13,7 +13,7 @@ type Workload struct {
 	Spec *pb.ProfileSpec
 }
 
-func NewCombined(ctx context.Context, addr, uiAddr, serverAddr string, wrk Workload) {
+func NewCombined(ctx context.Context, addr, uiAddr, serverAddr string, wrk Workload, user User) {
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -25,7 +25,7 @@ func NewCombined(ctx context.Context, addr, uiAddr, serverAddr string, wrk Workl
 	mngr := NewManager()
 	pb.RegisterManagerServer(grpcServer, mngr)
 
-	wrkr, err := NewWorker(ctx, addr, serverAddr, wrk)
+	wrkr, err := NewWorker(ctx, addr, serverAddr, wrk, user)
 	if err != nil {
 		log.Fatalf("failed to create worker: %v", err)
 	}

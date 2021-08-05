@@ -2,6 +2,7 @@ package scarab
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -11,10 +12,35 @@ import (
 	grpc "google.golang.org/grpc"
 )
 
+type Runner interface {
+	Run(ctx context.Context, args []*pb.JobArg)
+}
+
+type RunnerFunc func(ctx context.Context, args []*pb.JobArg)
+
+func (f RunnerFunc) Run(ctx context.Context, args []*pb.JobArg) {
+	f(ctx, args)
+}
+
+type User interface {
+	Setup(reg prom.Registerer) Runner
+}
+
+type UserFunc func(reg prom.Registerer) Runner
+
+func (u UserFunc) Setup(reg prom.Registerer) Runner {
+	return u(reg)
+}
+
 type Worker struct {
 	pb.UnimplementedWorkerServer
 
+	// This is the registry for the entire worker.
+	// Mostly only useful for the process metrics.
 	reg *prom.Registry
+
+	// user TODO(tcm) crap name
+	user User
 
 	conn *grpc.ClientConn
 	done chan struct{}
@@ -44,7 +70,7 @@ func registerOnce(ctx context.Context, addr string, conn *grpc.ClientConn, wrk W
 	}
 }
 
-func NewWorker(ctx context.Context, addr, serverAddr string, wrk Workload) (*Worker, error) {
+func NewWorker(ctx context.Context, addr, serverAddr string, wrk Workload, user User) (*Worker, error) {
 	reg := prom.NewRegistry()
 	pc := prom.NewProcessCollector(prom.ProcessCollectorOpts{})
 	gocol := prom.NewGoCollector()
@@ -93,8 +119,6 @@ func (s *Worker) ReportLoad(req *pb.ReportLoadRequest, stream pb.Worker_ReportLo
 	ctx := stream.Context()
 	defer ticker.Stop()
 
-	log.Printf("start reporting load")
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -111,25 +135,100 @@ func (s *Worker) ReportLoad(req *pb.ReportLoadRequest, stream pb.Worker_ReportLo
 	}
 }
 
+func (s *Worker) runJob(req *pb.RunJobRequest) error {
+	// setup metrics
+
+	return nil
+}
+
 func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
+	// get the worker details
+	req, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+
+	args := req.GetArgs()
+
 	ticker := time.NewTicker(1 * time.Second)
 	ctx := stream.Context()
 	defer ticker.Stop()
 
+	jreg := prom.NewRegistry()
+	u := s.user.Setup(jreg)
+
+	send := func() {
+		ms, err := jreg.Gather()
+		if err != nil {
+			log.Printf("gather failed, %v", err)
+			return
+		}
+
+		stream.Send(&pb.JobMetrics{Metrics: ms})
+	}
+
+	activeChan := make(chan int)
 	go func() {
+		var cancels []func()
 		for {
 			select {
 			case <-ctx.Done():
-				return
+				// not sure here, can we still send metrics?
+				break
 			case <-s.done:
-				return
+				break
 			case <-ticker.C:
-				stream.Send(&pb.JobMetrics{})
+				send()
+			case setActive := <-activeChan:
+				if setActive == 0 {
+					break
+				} else if len(cancels) == setActive {
+					// nothing to do
+				} else if len(cancels) > setActive {
+					extra := cancels[setActive:len(cancels)]
+					cancels = cancels[:setActive]
+					for _, c := range extra {
+						c()
+					}
+				} else {
+					needed := setActive - len(cancels)
+					us := make([]func(), needed)
+					for i := range us {
+						uctx, cancel := context.WithCancel(ctx)
+						us[i] = cancel
+						go func(ctx context.Context) {
+							for {
+								select {
+								case <-ctx.Done():
+									return
+								default:
+									// if the func quits early, we'll just re run it
+									u.Run(ctx, args)
+								}
+							}
+						}(uctx)
+					}
+					cancels = append(cancels, us...)
+				}
 			}
 		}
+
+		send()
+		for _, c := range cancels {
+			c()
+		}
 	}()
+
 	for {
-		stream.Recv()
+		req, err := stream.Recv()
+		if err == io.EOF {
+			send()
+			break
+		}
+		err = s.runJob(req)
+		if err != nil {
+			log.Printf("error running job, %v", err)
+		}
 	}
 
 	return nil
