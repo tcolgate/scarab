@@ -3,8 +3,7 @@ Opinions on load testing.
 
 Terminology:
 - Components under test. This is the actual code you have written that you wish
-  to test. It does not initially include dependencies (DBs, external caches)
-- 
+  to test. Ideally this excludes dependencies (DBs, external caches, other services)
 - System under test. This is the component under test, and all the dependent
   systems, and hosting systems, networking infrastructure, load balancing,
   and anything else.
