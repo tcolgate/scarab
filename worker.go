@@ -2,8 +2,11 @@ package scarab
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"time"
 
@@ -231,5 +234,33 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 		}
 	}
 
+	return nil
+}
+
+func RunStandaloneWorker(wrk Workload, user User) error {
+	ctx := context.Background()
+	addr := flag.String("addr", ":8083", "address to listen on")
+	serverAddr := flag.String("manager.addr", "localhost:8081", "address of the manager")
+	flag.Parse()
+
+	lis, err := net.Listen("tcp", *addr)
+	if err != nil {
+		return fmt.Errorf("failed to listen: %w", err)
+	}
+	var opts []grpc.ServerOption
+
+	grpcServer := grpc.NewServer(opts...)
+
+	wrkr, err := NewWorker(ctx, *addr, *serverAddr, wrk, user)
+	if err != nil {
+		return fmt.Errorf("failed to create worker, %w", err)
+	}
+	defer wrkr.Close()
+	pb.RegisterWorkerServer(grpcServer, wrkr)
+
+	err = grpcServer.Serve(lis)
+	if err != nil {
+		return fmt.Errorf("worker listen err, %w", err)
+	}
 	return nil
 }
