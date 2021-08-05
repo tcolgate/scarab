@@ -20,6 +20,30 @@ type Worker struct {
 	done chan struct{}
 }
 
+func registerOnce(ctx context.Context, addr string, conn *grpc.ClientConn, wrk Workload) error {
+	mcli := pb.NewManagerClient(conn)
+	hn, _ := os.Hostname()
+	req := pb.RegisterProfileRequest{
+		Spec: wrk.Spec,
+		Worker: &pb.WorkerDetails{
+			Name: hn,
+			Addr: hn + addr,
+		},
+	}
+	cli, err := mcli.RegisterProfile(ctx, &req)
+	if err != nil {
+		return err
+	}
+
+	// throw away the keepalives.
+	for {
+		_, err := cli.Recv()
+		if err != nil {
+			return err
+		}
+	}
+}
+
 func NewWorker(ctx context.Context, addr, serverAddr string, wrk Workload) (*Worker, error) {
 	reg := prom.NewRegistry()
 	pc := prom.NewProcessCollector(prom.ProcessCollectorOpts{})
@@ -44,32 +68,14 @@ func NewWorker(ctx context.Context, addr, serverAddr string, wrk Workload) (*Wor
 	}
 
 	go func() {
-		mcli := pb.NewManagerClient(conn)
-
-		hn, _ := os.Hostname()
-		req := pb.RegisterProfileRequest{
-			Spec: wrk.Spec,
-			Worker: &pb.WorkerDetails{
-				Name: hn,
-				Addr: hn + addr,
-			},
-		}
-		cli, err := mcli.RegisterProfile(ctx, &req)
-		if err != nil {
-			log.Printf("err: %v", err)
+		for {
+			if err := registerOnce(ctx, addr, conn, wrk); err != nil {
+				log.Printf("worker registration failed, %v", err)
+				time.Sleep(5 * time.Second)
+				continue
+			}
 			return
 		}
-
-		go func() {
-			// throw away the keepalives.
-			for {
-				_, err := cli.Recv()
-				if err != nil {
-					log.Printf("error getting keepalive, %#v", err)
-					return
-				}
-			}
-		}()
 	}()
 
 	return &Worker{
@@ -87,12 +93,14 @@ func (s *Worker) ReportLoad(req *pb.ReportLoadRequest, stream pb.Worker_ReportLo
 	ctx := stream.Context()
 	defer ticker.Stop()
 
-	log.Printf("start rreporting load")
+	log.Printf("start reporting load")
 
 	for {
 		select {
 		case <-ctx.Done():
+			return nil
 		case <-s.done:
+			return nil
 		case <-ticker.C:
 			ms, err := s.reg.Gather()
 			if err != nil {
@@ -101,7 +109,6 @@ func (s *Worker) ReportLoad(req *pb.ReportLoadRequest, stream pb.Worker_ReportLo
 			stream.Send(&pb.LoadMetrics{Metrics: ms})
 		}
 	}
-	return nil
 }
 
 func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
@@ -113,7 +120,9 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 		for {
 			select {
 			case <-ctx.Done():
+				return
 			case <-s.done:
+				return
 			case <-ticker.C:
 				stream.Send(&pb.JobMetrics{})
 			}
