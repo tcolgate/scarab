@@ -18,27 +18,19 @@ func setup(r prometheus.Registerer) scarab.Runner {
 		},
 	)
 	r.MustRegister(h)
+	f := newFake(
+		2*time.Millisecond,
+		1*time.Millisecond,
+		10*time.Millisecond,
+		2*time.Millisecond,
+		0.70)
 	return scarab.RunnerFunc(func(ctx context.Context, args []*pb.JobArg) {
-		f := newFake(
-			2*time.Millisecond,
-			1*time.Millisecond,
-			10*time.Millisecond,
-			2*time.Millisecond,
-			0.70)
-		for {
-			select {
-			case <-ctx.Done():
-			default:
-				func() {
-					tmr := prometheus.NewTimer(h)
-					defer tmr.ObserveDuration()
-					d, _ := f.Sample()
+		tmr := prometheus.NewTimer(h)
+		defer tmr.ObserveDuration()
+		d, _ := f.Sample()
 
-					time.Sleep(d)
-					log.Printf("took %v", d)
-				}()
-			}
-		}
+		time.Sleep(d)
+		log.Printf("took %v", d)
 	})
 }
 
