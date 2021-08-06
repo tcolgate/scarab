@@ -3,8 +3,11 @@ package scarab
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
+	model "github.com/prometheus/client_model/go"
+	"github.com/prometheus/common/expfmt"
 	pb "github.com/tcolgate/scarab/pb"
 	grpc "google.golang.org/grpc"
 )
@@ -79,7 +82,7 @@ func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Mana
 	}
 }
 
-// RunProfile implements the UI StartJob method.
+// RunProfile implements the manager's RunProfile method
 func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.StartJobResponse, error) {
 	clientOpts := []grpc.DialOption{
 		grpc.WithInsecure(),
@@ -106,12 +109,19 @@ func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.St
 			return nil, err
 		}
 		go func() {
-			// throw away the keepalives.
+			workerAddrLabel := "worker_addr"
 			for {
-				_, err := rjsrc.Recv()
+				ms, err := rjsrc.Recv()
 				if err != nil {
 					log.Printf("error getting loadreport, %#v", err)
 					return
+				}
+				log.Printf("got metrics: %#v", ms)
+				for _, mf := range ms.Metrics {
+					for i := range mf.Metric {
+						mf.Metric[i].Label = append(mf.Metric[i].Label, &model.LabelPair{Name: &workerAddrLabel, Value: &addr})
+					}
+					expfmt.MetricFamilyToText(os.Stdout, mf)
 				}
 			}
 		}()
