@@ -15,6 +15,39 @@ type Context struct {
 	Debug bool
 }
 
+type RunCmd struct {
+	Addr    string `kong:"default=':8081',help='address for gRPC to connect to.'"`
+	Profile string `kong:"arg,help='the profile to run.'"`
+	Version string `kong:"arg,help='the profile version.'"`
+	Name    string `kong:"help='a name for the job'"`
+	Users   uint64 `kong:"default='1',help='how many users to run'"`
+}
+
+func (cmd *RunCmd) Run(cctx *Context) error {
+	var err error
+	opts := []grpc.DialOption{
+		grpc.WithInsecure(),
+	}
+	conn, err := grpc.Dial(cmd.Addr, opts...)
+	if err != nil {
+		return err
+	}
+
+	client := pb.NewManagerUIClient(conn)
+	ctx := context.Background()
+
+	req := &pb.StartJobRequest{
+		Profile: cmd.Profile,
+		Version: cmd.Version,
+		Users:   cmd.Users,
+	}
+
+	resp, err := client.StartJob(ctx, req)
+	log.Printf("got id %v", resp.GetId())
+
+	return err
+}
+
 type GetCmd struct {
 	Addr string `kong:"default=':8081',help='address for gRPC to connect to.'"`
 }
@@ -77,6 +110,7 @@ var CLI = struct {
 
 	Manager ManagerCmd `kong:"cmd,help='run manager.'"`
 	Get     GetCmd     `kong:"cmd,help='query manager.'"`
+	Run     RunCmd     `kong:"cmd,help='run a profile.'"`
 }{
 	Debug: false,
 }

@@ -46,7 +46,9 @@ func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Mana
 		for {
 			select {
 			case <-ctx.Done():
+				return
 			case <-s.done:
+				return
 			case <-ticker.C:
 				stream.Send(&pb.KeepAlive{})
 			}
@@ -65,6 +67,9 @@ func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Mana
 	defer srvconn.Close()
 	wcli := pb.NewWorkerClient(srvconn)
 	loadrep, err := wcli.ReportLoad(ctx, &pb.ReportLoadRequest{})
+	if err != nil {
+		return err
+	}
 
 	for {
 		_, err := loadrep.Recv()
@@ -72,8 +77,6 @@ func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Mana
 			return err
 		}
 	}
-
-	return nil
 }
 
 // RunProfile implements the UI StartJob method.
@@ -113,16 +116,17 @@ func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.St
 			}
 		}()
 		err = rjsrc.Send(&pb.RunJobRequest{
-			Profile: "myprofile",
+			Profile: j.Profile,
 			Args:    []*pb.JobArg{},
+			Users:   j.Users,
 		})
 		if err != nil {
-			log.Panicf("runjub error, %v", err)
+			log.Printf("runjub error, %v", err)
 			return nil, err
 		}
 	}
 
-	return nil, nil
+	return &pb.StartJobResponse{}, nil
 }
 
 // StartJob implements the UI StartJob method.

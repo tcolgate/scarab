@@ -110,6 +110,7 @@ func NewWorker(ctx context.Context, addr, serverAddr string, wrk Workload, user 
 	return &Worker{
 		reg:  reg,
 		conn: conn,
+		user: user,
 	}, nil
 }
 
@@ -170,31 +171,36 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 		stream.Send(&pb.JobMetrics{Metrics: ms})
 	}
 
-	activeChan := make(chan int)
+	// TODO(tcm): can't just use contexts here for stopping
+	// We should have a proper coordinated and confirmed
+	// stop to avoid missing/cancelling any in flight requests
+	// (doing so would skew results).
+	activeChan := make(chan uint64)
 	go func() {
 		var cancels []func()
+	loop:
 		for {
 			select {
 			case <-ctx.Done():
 				// not sure here, can we still send metrics?
-				break
+				break loop
 			case <-s.done:
-				break
+				break loop
 			case <-ticker.C:
 				send()
 			case setActive := <-activeChan:
 				if setActive == 0 {
-					break
-				} else if len(cancels) == setActive {
+					break loop
+				} else if uint64(len(cancels)) == setActive {
 					// nothing to do
-				} else if len(cancels) > setActive {
-					extra := cancels[setActive:len(cancels)]
+				} else if uint64(len(cancels)) > setActive {
+					extra := cancels[setActive:]
 					cancels = cancels[:setActive]
 					for _, c := range extra {
 						c()
 					}
 				} else {
-					needed := setActive - len(cancels)
+					needed := setActive - uint64(len(cancels))
 					us := make([]func(), needed)
 					for i := range us {
 						uctx, cancel := context.WithCancel(ctx)
@@ -221,6 +227,8 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 			c()
 		}
 	}()
+
+	activeChan <- req.Users
 
 	for {
 		req, err := stream.Recv()

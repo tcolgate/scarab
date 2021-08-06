@@ -105,7 +105,9 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 	entropy := ulid.Monotonic(r, 0)
 
 	for {
-		log.Printf("loop")
+		log.Printf("profile loop")
+		log.Printf("profile loop entries: %#v", entries)
+		log.Printf("profile loop subs: %#v", subs)
 		select {
 		case <-ctx.Done():
 		case reg := <-pr.reg:
@@ -145,6 +147,7 @@ func (pr *ProfileRegistry) loop(ctx context.Context) {
 			}
 
 			active := prof.GetActiveWorkers()
+			log.Printf("active ws %#v", active)
 			for _, s := range subs[key] {
 				s.workers <- active
 			}
@@ -246,7 +249,9 @@ func (pr *ProfileRegistry) Subscribe(profile, version string) ProfileSubscriptio
 	ch := make(chan ProfileSubscription)
 
 	pr.subs <- profSubReq{
-		resp: ch,
+		profile: profile,
+		version: version,
+		resp:    ch,
 	}
 
 	resp := <-ch
@@ -274,13 +279,14 @@ func (s *ProfileSubscription) Update(ctx context.Context) bool {
 	select {
 	case ws, ok := <-s.workers:
 		if !ok {
+			log.Printf("update workers not ok")
 			return false
 		}
+		log.Printf("update workers %#v", ws)
 		s.lastWorkers = ws
 		return true
 	case <-ctx.Done():
 		return false
-
 	}
 }
 

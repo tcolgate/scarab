@@ -12,7 +12,10 @@ import (
 
 func setup(r prometheus.Registerer) scarab.Runner {
 	h := prometheus.NewHistogram(
-		prometheus.HistogramOpts{},
+		prometheus.HistogramOpts{
+			Name: "fake_duration_seconds",
+			Help: "how long we slept for",
+		},
 	)
 	r.MustRegister(h)
 	return scarab.RunnerFunc(func(ctx context.Context, args []*pb.JobArg) {
@@ -32,6 +35,7 @@ func setup(r prometheus.Registerer) scarab.Runner {
 					d, _ := f.Sample()
 
 					time.Sleep(d)
+					log.Printf("took %v", d)
 				}()
 			}
 		}

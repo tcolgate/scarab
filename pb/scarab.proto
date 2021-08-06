@@ -38,7 +38,9 @@ message RunJobRequest {
   string          profile  = 1;
   float           interval = 2;
   float           maxrps   = 3;
-  repeated scarab.JobArg args     = 4;
+  uint64          users    = 4;
+
+  repeated scarab.JobArg args     = 5;
 }
 
 message JobMetrics {

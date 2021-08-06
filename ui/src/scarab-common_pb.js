@@ -1814,7 +1814,7 @@ proto.scarab.JobArg.prototype.hasValue = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.scarab.StartJobRequest.repeatedFields_ = [3];
+proto.scarab.StartJobRequest.repeatedFields_ = [4];
 
 
 
@@ -1849,6 +1849,7 @@ proto.scarab.StartJobRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     profile: jspb.Message.getFieldWithDefault(msg, 1, ""),
     version: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    users: jspb.Message.getFieldWithDefault(msg, 3, 0),
     argsList: jspb.Message.toObjectList(msg.getArgsList(),
     proto.scarab.JobArg.toObject, includeInstance)
   };
@@ -1896,6 +1897,10 @@ proto.scarab.StartJobRequest.deserializeBinaryFromReader = function(msg, reader)
       msg.setVersion(value);
       break;
     case 3:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setUsers(value);
+      break;
+    case 4:
       var value = new proto.scarab.JobArg;
       reader.readMessage(value,proto.scarab.JobArg.deserializeBinaryFromReader);
       msg.addArgs(value);
@@ -1943,10 +1948,17 @@ proto.scarab.StartJobRequest.serializeBinaryToWriter = function(message, writer)
       f
     );
   }
+  f = message.getUsers();
+  if (f !== 0) {
+    writer.writeUint64(
+      3,
+      f
+    );
+  }
   f = message.getArgsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      3,
+      4,
       f,
       proto.scarab.JobArg.serializeBinaryToWriter
     );
@@ -1991,12 +2003,30 @@ proto.scarab.StartJobRequest.prototype.setVersion = function(value) {
 
 
 /**
- * repeated JobArg args = 3;
+ * optional uint64 users = 3;
+ * @return {number}
+ */
+proto.scarab.StartJobRequest.prototype.getUsers = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.scarab.StartJobRequest} returns this
+ */
+proto.scarab.StartJobRequest.prototype.setUsers = function(value) {
+  return jspb.Message.setProto3IntField(this, 3, value);
+};
+
+
+/**
+ * repeated JobArg args = 4;
  * @return {!Array<!proto.scarab.JobArg>}
  */
 proto.scarab.StartJobRequest.prototype.getArgsList = function() {
   return /** @type{!Array<!proto.scarab.JobArg>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.scarab.JobArg, 3));
+    jspb.Message.getRepeatedWrapperField(this, proto.scarab.JobArg, 4));
 };
 
 
@@ -2005,7 +2035,7 @@ proto.scarab.StartJobRequest.prototype.getArgsList = function() {
  * @return {!proto.scarab.StartJobRequest} returns this
 */
 proto.scarab.StartJobRequest.prototype.setArgsList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 3, value);
+  return jspb.Message.setRepeatedWrapperField(this, 4, value);
 };
 
 
@@ -2015,7 +2045,7 @@ proto.scarab.StartJobRequest.prototype.setArgsList = function(value) {
  * @return {!proto.scarab.JobArg}
  */
 proto.scarab.StartJobRequest.prototype.addArgs = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.scarab.JobArg, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.scarab.JobArg, opt_index);
 };
 
 

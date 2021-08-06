@@ -234,6 +234,9 @@ export class StartJobRequest extends jspb.Message {
   getVersion(): string;
   setVersion(value: string): void;
 
+  getUsers(): number;
+  setUsers(value: number): void;
+
   clearArgsList(): void;
   getArgsList(): Array<JobArg>;
   setArgsList(value: Array<JobArg>): void;
@@ -253,6 +256,7 @@ export namespace StartJobRequest {
   export type AsObject = {
     profile: string,
     version: string,
+    users: number,
     argsList: Array<JobArg.AsObject>,
   }
 }

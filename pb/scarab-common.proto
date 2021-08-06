@@ -53,7 +53,8 @@ message JobArg {
 message StartJobRequest {
   string          profile = 1;
   string          version = 2;
-  repeated JobArg args    = 3;
+  uint64          users   = 3;
+  repeated JobArg args    = 4;
 }
 
 message StartJobResponse {
