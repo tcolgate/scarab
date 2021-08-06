@@ -54,7 +54,8 @@ message StartJobRequest {
   string          profile = 1;
   string          version = 2;
   uint64          users   = 3;
-  repeated JobArg args    = 4;
+  float           maxRate = 4;
+  repeated JobArg args    = 5;
 }
 
 message StartJobResponse {

@@ -16,11 +16,12 @@ type Context struct {
 }
 
 type RunCmd struct {
-	Addr    string `kong:"default=':8081',help='address for gRPC to connect to.'"`
-	Profile string `kong:"arg,help='the profile to run.'"`
-	Version string `kong:"arg,help='the profile version.'"`
-	Name    string `kong:"help='a name for the job'"`
-	Users   uint64 `kong:"default='1',help='how many users to run'"`
+	Addr    string  `kong:"default=':8081',help='address for gRPC to connect to.'"`
+	Profile string  `kong:"arg,help='the profile to run.'"`
+	Version string  `kong:"arg,help='the profile version.'"`
+	Name    string  `kong:"help='a name for the job'"`
+	Users   uint64  `kong:"default='1',help='how many users to run'"`
+	MaxRate float32 `kong:"default='0',help='maximum rate to run the tasks, per user'"`
 }
 
 func (cmd *RunCmd) Run(cctx *Context) error {
@@ -40,6 +41,7 @@ func (cmd *RunCmd) Run(cctx *Context) error {
 		Profile: cmd.Profile,
 		Version: cmd.Version,
 		Users:   cmd.Users,
+		MaxRate: cmd.MaxRate,
 	}
 
 	resp, err := client.StartJob(ctx, req)

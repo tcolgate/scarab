@@ -12,6 +12,7 @@ import (
 
 	prom "github.com/prometheus/client_golang/prometheus"
 	pb "github.com/tcolgate/scarab/pb"
+	"golang.org/x/time/rate"
 	grpc "google.golang.org/grpc"
 )
 
@@ -206,6 +207,10 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 						uctx, cancel := context.WithCancel(ctx)
 						us[i] = cancel
 						go func(ctx context.Context) {
+							var lim *rate.Limiter
+							if req.MaxRate != 0 {
+								lim = rate.NewLimiter(rate.Limit(req.MaxRate), 1)
+							}
 							for {
 								select {
 								case <-ctx.Done():
@@ -213,6 +218,11 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 								default:
 									// if the func quits early, we'll just re run it
 									u.Run(ctx, args)
+									if lim != nil {
+										if err := lim.Wait(ctx); err != nil {
+											return
+										}
+									}
 								}
 							}
 						}(uctx)
@@ -236,10 +246,10 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 			send()
 			break
 		}
-		err = s.runJob(req)
 		if err != nil {
-			log.Printf("error running job, %v", err)
+			return err
 		}
+		activeChan <- req.Users
 	}
 
 	return nil

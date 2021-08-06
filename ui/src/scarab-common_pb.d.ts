@@ -237,6 +237,9 @@ export class StartJobRequest extends jspb.Message {
   getUsers(): number;
   setUsers(value: number): void;
 
+  getMaxrate(): number;
+  setMaxrate(value: number): void;
+
   clearArgsList(): void;
   getArgsList(): Array<JobArg>;
   setArgsList(value: Array<JobArg>): void;
@@ -257,6 +260,7 @@ export namespace StartJobRequest {
     profile: string,
     version: string,
     users: number,
+    maxrate: number,
     argsList: Array<JobArg.AsObject>,
   }
 }

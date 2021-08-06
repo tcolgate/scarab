@@ -31,7 +31,6 @@ func NewManager() *Manager {
 }
 
 func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Manager_RegisterProfileServer) error {
-	log.Printf("RegisterProfile")
 	reg, err := s.profiles.Register(req)
 	if err != nil {
 		return err
@@ -129,6 +128,7 @@ func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.St
 			Profile: j.Profile,
 			Args:    []*pb.JobArg{},
 			Users:   j.Users,
+			MaxRate: j.MaxRate,
 		})
 		if err != nil {
 			log.Printf("runjub error, %v", err)
