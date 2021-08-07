@@ -2,11 +2,8 @@ package scarab
 
 import (
 	"context"
-	"flag"
-	"fmt"
 	"io"
 	"log"
-	"net"
 	"os"
 	"time"
 
@@ -17,13 +14,13 @@ import (
 )
 
 type Runner interface {
-	Run(ctx context.Context, args []*pb.JobArg)
+	Run(args []*pb.JobArg)
 }
 
-type RunnerFunc func(ctx context.Context, args []*pb.JobArg)
+type RunnerFunc func(args []*pb.JobArg)
 
-func (f RunnerFunc) Run(ctx context.Context, args []*pb.JobArg) {
-	f(ctx, args)
+func (f RunnerFunc) Run(args []*pb.JobArg) {
+	f(args)
 }
 
 type User interface {
@@ -140,13 +137,28 @@ func (s *Worker) ReportLoad(req *pb.ReportLoadRequest, stream pb.Worker_ReportLo
 	}
 }
 
-func (s *Worker) runJob(req *pb.RunJobRequest) error {
-	// setup metrics
-
-	return nil
+// doTasks runs the runner at the maximum rate given by the rate limiter
+func doTasks(ctx context.Context, maxRate float32, r Runner, args []*pb.JobArg) {
+	var lim *rate.Limiter
+	if maxRate != 0 {
+		lim = rate.NewLimiter(rate.Limit(maxRate), 1)
+	}
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			r.Run(args)
+			if lim != nil {
+				if err := lim.Wait(ctx); err != nil {
+					return
+				}
+			}
+		}
+	}
 }
 
-func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
+func (s *Worker) RunProfile(stream pb.Worker_RunProfileServer) error {
 	// get the worker details
 	req, err := stream.Recv()
 	if err != nil {
@@ -190,10 +202,9 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 			case <-ticker.C:
 				send()
 			case setActive := <-activeChan:
-				if setActive == 0 {
+				if uint64(len(cancels)) == setActive {
+				} else if setActive == 0 {
 					break loop
-				} else if uint64(len(cancels)) == setActive {
-					// nothing to do
 				} else if uint64(len(cancels)) > setActive {
 					extra := cancels[setActive:]
 					cancels = cancels[:setActive]
@@ -206,26 +217,7 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 					for i := range us {
 						uctx, cancel := context.WithCancel(ctx)
 						us[i] = cancel
-						go func(ctx context.Context) {
-							var lim *rate.Limiter
-							if req.MaxRate != 0 {
-								lim = rate.NewLimiter(rate.Limit(req.MaxRate), 1)
-							}
-							for {
-								select {
-								case <-ctx.Done():
-									return
-								default:
-									// if the func quits early, we'll just re run it
-									u.Run(ctx, args)
-									if lim != nil {
-										if err := lim.Wait(ctx); err != nil {
-											return
-										}
-									}
-								}
-							}
-						}(uctx)
+						go doTasks(uctx, req.MaxRate, u, args)
 					}
 					cancels = append(cancels, us...)
 				}
@@ -252,42 +244,5 @@ func (s *Worker) RunJob(stream pb.Worker_RunJobServer) error {
 		activeChan <- req.Users
 	}
 
-	return nil
-}
-
-func RunStandaloneWorker(profile, ver, desc string, args []*pb.ProfileArg, user User) error {
-	ctx := context.Background()
-	addr := flag.String("addr", ":8083", "address to listen on")
-	serverAddr := flag.String("manager.addr", "localhost:8081", "address of the manager")
-	flag.Parse()
-
-	lis, err := net.Listen("tcp", *addr)
-	if err != nil {
-		return fmt.Errorf("failed to listen: %w", err)
-	}
-	var opts []grpc.ServerOption
-
-	grpcServer := grpc.NewServer(opts...)
-
-	wrk := Workload{
-		Spec: &pb.ProfileSpec{
-			Profile:     profile,
-			Version:     ver,
-			Description: desc,
-			Args:        args,
-		},
-	}
-
-	wrkr, err := NewWorker(ctx, *addr, *serverAddr, wrk, user)
-	if err != nil {
-		return fmt.Errorf("failed to create worker, %w", err)
-	}
-	defer wrkr.Close()
-	pb.RegisterWorkerServer(grpcServer, wrkr)
-
-	err = grpcServer.Serve(lis)
-	if err != nil {
-		return fmt.Errorf("worker listen err, %w", err)
-	}
 	return nil
 }

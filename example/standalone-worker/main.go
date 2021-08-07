@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"time"
 
@@ -24,7 +23,7 @@ func setup(r prometheus.Registerer) scarab.Runner {
 		10*time.Millisecond,
 		2*time.Millisecond,
 		0.70)
-	return scarab.RunnerFunc(func(ctx context.Context, args []*pb.JobArg) {
+	return scarab.RunnerFunc(func(args []*pb.JobArg) {
 		tmr := prometheus.NewTimer(h)
 		defer tmr.ObserveDuration()
 		d, _ := f.Sample()

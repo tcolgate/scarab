@@ -81,6 +81,23 @@ func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Mana
 	}
 }
 
+func splitUserCounts(workers, users uint) []uint {
+	if workers == 0 {
+		return nil
+	}
+	ws := make([]uint, workers)
+	base := users / workers
+	extra := users % workers
+	for i := range ws {
+		ws[i] = base
+		if extra > 0 {
+			ws[i]++
+			extra--
+		}
+	}
+	return ws
+}
+
 // RunProfile implements the manager's RunProfile method
 func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.StartJobResponse, error) {
 	clientOpts := []grpc.DialOption{
@@ -103,7 +120,7 @@ func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.St
 		}
 		defer srvconn.Close()
 		wcli := pb.NewWorkerClient(srvconn)
-		rjsrc, err := wcli.RunJob(ctx)
+		rjsrc, err := wcli.RunProfile(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -124,7 +141,7 @@ func (m *Manager) RunProfile(ctx context.Context, j *pb.StartJobRequest) (*pb.St
 				}
 			}
 		}()
-		err = rjsrc.Send(&pb.RunJobRequest{
+		err = rjsrc.Send(&pb.RunProfileRequest{
 			Profile: j.Profile,
 			Args:    []*pb.JobArg{},
 			Users:   j.Users,

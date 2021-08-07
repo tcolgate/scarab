@@ -132,7 +132,7 @@ var Manager_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkerClient interface {
 	ReportLoad(ctx context.Context, in *ReportLoadRequest, opts ...grpc.CallOption) (Worker_ReportLoadClient, error)
-	RunJob(ctx context.Context, opts ...grpc.CallOption) (Worker_RunJobClient, error)
+	RunProfile(ctx context.Context, opts ...grpc.CallOption) (Worker_RunProfileClient, error)
 }
 
 type workerClient struct {
@@ -175,30 +175,30 @@ func (x *workerReportLoadClient) Recv() (*LoadMetrics, error) {
 	return m, nil
 }
 
-func (c *workerClient) RunJob(ctx context.Context, opts ...grpc.CallOption) (Worker_RunJobClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[1], "/scarab.Worker/RunJob", opts...)
+func (c *workerClient) RunProfile(ctx context.Context, opts ...grpc.CallOption) (Worker_RunProfileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[1], "/scarab.Worker/RunProfile", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &workerRunJobClient{stream}
+	x := &workerRunProfileClient{stream}
 	return x, nil
 }
 
-type Worker_RunJobClient interface {
-	Send(*RunJobRequest) error
+type Worker_RunProfileClient interface {
+	Send(*RunProfileRequest) error
 	Recv() (*JobMetrics, error)
 	grpc.ClientStream
 }
 
-type workerRunJobClient struct {
+type workerRunProfileClient struct {
 	grpc.ClientStream
 }
 
-func (x *workerRunJobClient) Send(m *RunJobRequest) error {
+func (x *workerRunProfileClient) Send(m *RunProfileRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *workerRunJobClient) Recv() (*JobMetrics, error) {
+func (x *workerRunProfileClient) Recv() (*JobMetrics, error) {
 	m := new(JobMetrics)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -211,7 +211,7 @@ func (x *workerRunJobClient) Recv() (*JobMetrics, error) {
 // for forward compatibility
 type WorkerServer interface {
 	ReportLoad(*ReportLoadRequest, Worker_ReportLoadServer) error
-	RunJob(Worker_RunJobServer) error
+	RunProfile(Worker_RunProfileServer) error
 	mustEmbedUnimplementedWorkerServer()
 }
 
@@ -222,8 +222,8 @@ type UnimplementedWorkerServer struct {
 func (UnimplementedWorkerServer) ReportLoad(*ReportLoadRequest, Worker_ReportLoadServer) error {
 	return status.Errorf(codes.Unimplemented, "method ReportLoad not implemented")
 }
-func (UnimplementedWorkerServer) RunJob(Worker_RunJobServer) error {
-	return status.Errorf(codes.Unimplemented, "method RunJob not implemented")
+func (UnimplementedWorkerServer) RunProfile(Worker_RunProfileServer) error {
+	return status.Errorf(codes.Unimplemented, "method RunProfile not implemented")
 }
 func (UnimplementedWorkerServer) mustEmbedUnimplementedWorkerServer() {}
 
@@ -259,26 +259,26 @@ func (x *workerReportLoadServer) Send(m *LoadMetrics) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Worker_RunJob_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(WorkerServer).RunJob(&workerRunJobServer{stream})
+func _Worker_RunProfile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(WorkerServer).RunProfile(&workerRunProfileServer{stream})
 }
 
-type Worker_RunJobServer interface {
+type Worker_RunProfileServer interface {
 	Send(*JobMetrics) error
-	Recv() (*RunJobRequest, error)
+	Recv() (*RunProfileRequest, error)
 	grpc.ServerStream
 }
 
-type workerRunJobServer struct {
+type workerRunProfileServer struct {
 	grpc.ServerStream
 }
 
-func (x *workerRunJobServer) Send(m *JobMetrics) error {
+func (x *workerRunProfileServer) Send(m *JobMetrics) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *workerRunJobServer) Recv() (*RunJobRequest, error) {
-	m := new(RunJobRequest)
+func (x *workerRunProfileServer) Recv() (*RunProfileRequest, error) {
+	m := new(RunProfileRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -299,8 +299,8 @@ var Worker_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "RunJob",
-			Handler:       _Worker_RunJob_Handler,
+			StreamName:    "RunProfile",
+			Handler:       _Worker_RunProfile_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

@@ -23,7 +23,7 @@ message KeepAlive{
 
 service Worker {
   rpc ReportLoad(ReportLoadRequest) returns (stream LoadMetrics) {};
-  rpc RunJob(stream RunJobRequest) returns (stream JobMetrics) {};
+  rpc RunProfile(stream RunProfileRequest) returns (stream JobMetrics) {};
 }
 
 message ReportLoadRequest {
@@ -34,7 +34,7 @@ message LoadMetrics {
   repeated io.prometheus.client.MetricFamily metrics = 1;
 }
 
-message RunJobRequest {
+message RunProfileRequest {
   string          profile  = 1;
   float           interval = 2;
   float           maxRate  = 3;

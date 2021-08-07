@@ -22,8 +22,8 @@ Manager:
 
 Worker:
 - Self contained process, registers the profile it supports with the Manager.
-- Waits for request to run one or more instances of the workload.
-- Reports metrics back to the manager.
+- Waits for request to run one or more instances of the profile. Reports
+  metrics back to the manager.
 
 Metrics should be based on prometheus metrics, with the possible exception of
 histograms. So far as possible we should reuse the prometheus client library
