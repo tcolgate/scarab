@@ -158,6 +158,9 @@ func doTasks(ctx context.Context, maxRate float32, r Runner, args []*pb.JobArg) 
 	}
 }
 
+// RunProfile runs the given profile synchronous and streams the
+// results back to the caller. The number of running users can be
+// updated, changes to all the other request arguments are ignored.
 func (s *Worker) RunProfile(stream pb.Worker_RunProfileServer) error {
 	// get the worker details
 	req, err := stream.Recv()
