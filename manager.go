@@ -10,7 +10,7 @@ import (
 	model "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 	"github.com/prometheus/prometheus/pkg/labels"
-	tsdb "github.com/prometheus/prometheus/tsdb"
+	"github.com/prometheus/prometheus/tsdb"
 	pb "github.com/tcolgate/scarab/pb"
 	grpc "google.golang.org/grpc"
 )
@@ -31,31 +31,6 @@ func NewManager() *Manager {
 		done:     make(chan struct{}),
 	}
 	return mng
-}
-
-func getValue(t *model.MetricType, m *model.Metric) float64 {
-	switch *t {
-	case model.MetricType_GAUGE:
-		return *m.Gauge.Value
-	case model.MetricType_COUNTER:
-		return *m.Counter.Value
-	case model.MetricType_UNTYPED:
-		return *m.Untyped.Value
-		//	case model.MetricType_HISTOGRAM:
-		//		return *m.Histogram.SampleCount)q
-		//	case model.MetricType_SUMMARY:
-		//		return *m.Summary.Quantile
-	default:
-		return 0
-	}
-	/*
-				Gauge                *Gauge       `protobuf:"bytes,2,opt,name=gauge" json:"gauge,omitempty"`
-				Counter              *Counter     `protobuf:"bytes,3,opt,name=counter" json:"counter,omitempty"`
-		 		Summary              *Summary     `protobuf:"bytes,4,opt,name=summary" json:"summary,omitempty"`
-		 		Untyped              *Untyped     `protobuf:"bytes,5,opt,name=untyped" json:"untyped,omitempty"`
-		 		Histogram            *Histogram   `protobuf:"bytes,7,opt,name=histogram" json:"histogram,omitempty"`
-	*/
-
 }
 
 func (s *Manager) RegisterProfile(req *pb.RegisterProfileRequest, stream pb.Manager_RegisterProfileServer) error {
@@ -139,40 +114,15 @@ func splitUserCounts(workers, users uint) []uint {
 	return ws
 }
 
-type metricsWriter struct {
-	db *tsdb.DB
-}
-
-/*
-	db, err := tsdb.Open("tsdb/", nil, nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
-*/
-
-func (mw *metricsWriter) WriteMetrics(ctx context.Context, ms []*model.MetricFamily, ls []labels.Label) error {
-	/* this needs to do the whole AppendFast thing */
-	log.Printf("got metrics: %#v", ms)
-	app := mw.db.Appender(ctx)
-	for _, mf := range ms {
-		mt := mf.Type
-		for i := range mf.Metric {
-			m := mf.Metric[i]
-			m.Label = append(m.Label, &model.LabelPair{Name: &workerAddrLabel, Value: &addr})
-			v := getValue(mt, m)
-			app.Append(0, m.Label, m.GetTimestampMs(), v)
-		}
-	}
-	app.Commit()
-
-	return nil
-}
-
 func (m *Manager) RunJob(ctx context.Context, j *pb.StartJobRequest) (*pb.StartJobResponse, error) {
 	clientOpts := []grpc.DialOption{
 		grpc.WithInsecure(),
 	}
-	mw := &metricsWriter{}
+	db, err := tsdb.Open("tsdb/", nil, nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	mw := &metricsWriter{db}
 
 	sub := m.profiles.Subscribe(j.Profile, j.Version)
 	//args := sub.Args
@@ -195,14 +145,14 @@ func (m *Manager) RunJob(ctx context.Context, j *pb.StartJobRequest) (*pb.StartJ
 			return nil, err
 		}
 		go func() {
-			ls := []labels.Label{{"worker_addr", addr}}
+			ls := []labels.Label{{Name: "worker_addr", Value: addr}}
 			for {
 				ms, err := rjsrc.Recv()
 				if err != nil {
 					log.Printf("error getting loadreport, %#v", err)
 					return
 				}
-				mw.WriteMetrics(ctx, ms, ls)
+				mw.WriteMetrics(ctx, ms.Metrics, ls)
 			}
 		}()
 		err = rjsrc.Send(&pb.RunProfileRequest{
